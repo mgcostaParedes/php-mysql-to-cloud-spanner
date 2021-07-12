@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MgCosta\MysqlParser\Describer;
+namespace MgCosta\MysqlParser;
 
 use MgCosta\MysqlParser\Contracts\DescribeExtractor;
 

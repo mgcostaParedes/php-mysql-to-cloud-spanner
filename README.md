@@ -27,7 +27,7 @@ for every framework )
 
 use Illuminate\Support\Facades\DB;
 use MgCosta\MysqlParser\Parser;
-use MgCosta\MysqlParser\Describer\MysqlDescriber;
+use MgCosta\MysqlParser\MysqlDescriber;
 
 
 $parser = new Parser();

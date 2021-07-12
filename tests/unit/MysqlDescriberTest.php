@@ -3,7 +3,7 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
-use MgCosta\MysqlParser\Describer\MysqlDescriber;
+use MgCosta\MysqlParser\MysqlDescriber;
 
 class MysqlDescriberTest extends Unit
 {
