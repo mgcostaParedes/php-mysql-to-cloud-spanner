@@ -33,7 +33,7 @@ use MgCosta\MysqlParser\Describer\MysqlDescriber;
 $parser = new Parser();
 $describer = new MysqlDescriber();
 
-$tableName = 'flights';
+$tableName = 'users';
 
 // you can extract the table details doing the following
 $table = DB::select(DB::raw($describer->getTableDetails($tableName)));

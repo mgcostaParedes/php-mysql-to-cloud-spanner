@@ -74,7 +74,10 @@ class Parser implements MysqlParsable, ParserBuildable
 
     public function setKeys(array $keys): Parser
     {
-        $requiredKeys = ['TABLE_NAME', 'COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME'];
+        $requiredKeys = [
+            'TABLE_NAME', 'COLUMN_NAME', 'CONSTRAINT_NAME',
+            'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME'
+        ];
         $this->validateArrayKeys($keys, $requiredKeys, 'described keys');
 
         $this->describedKeys = $keys;
