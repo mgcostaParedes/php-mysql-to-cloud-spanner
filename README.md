@@ -3,7 +3,7 @@
 [![License](https://poser.pugx.org/mgcosta/spanner-orm-builder/license)](//packagist.org/packages/mgcosta/spanner-orm-builder)
 [![Actions Status](https://github.com/mgcostaParedes/spanner-orm-builder/workflows/CI/badge.svg)](https://github.com/mgcostaParedes/spanner-orm-builder/actions)
 [![codecov](https://codecov.io/gh/mgcostaParedes/spanner-orm-builder/branch/main/graph/badge.svg?token=OEUY7ZDTOP)](https://codecov.io/gh/mgcostaParedes/spanner-orm-builder)
-[![Total Downloads](https://poser.pugx.org/mgcosta/spanner-orm-builder/downloads)](//packagist.org/packages/mgcosta/spanner-orm-builder)
+[![Total Downloads](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/downloads)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
 
 
 The MySQL Parser to Google Cloud Spanner is a library for PHP, providing an easy way to transpile the "create tables" from MySQL to valid schemas for **Google Cloud Spanner** syntax.
