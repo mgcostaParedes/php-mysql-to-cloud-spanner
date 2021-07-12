@@ -14,16 +14,22 @@ use RuntimeException;
 class Parser implements MysqlParsable, ParserBuildable
 {
     /**
+     * The name of the table to parse
+     *
      * @var string
      */
     protected $tableName;
 
     /**
+     * The described table with columns from MySQL
+     *
      * @var array
      */
     protected $describedTable;
 
     /**
+     * The described table keys from MySQL
+     *
      * @var array
      */
     protected $describedKeys;
