@@ -1,0 +1,52 @@
+{
+    "name": "mgcosta/mysql-to-cloud-spanner",
+    "type": "library",
+    "description": "Mysql parser to Google Cloud Spanner",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Miguel Costa",
+            "email": "miguelcostaparedes@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.3 || ^8.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "ext-xdebug": "*",
+        "mockery/mockery": "^1.4",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpunit/phpunit": "^9",
+        "sebastian/phpcpd": "^5.0",
+        "squizlabs/php_codesniffer": "^3.5",
+        "codeception/c3": "^2.4",
+        "codeception/codeception": "^4.1",
+        "codeception/module-asserts": "^1.2",
+        "codeception/module-phpbrowser": "^1.0.0"
+    },
+    "config": {
+        "platform": {
+            "php": "7.3"
+        },
+        "vendor-dir": "vendor"
+    },
+    "autoload": {
+        "psr-4": {
+            "MgCosta\\MysqlParser\\": "src/MysqlParser"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "scripts": {
+        "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "post-update-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
+        "phpcpd": "phpcpd -vvv --min-tokens=40 src",
+        "phpcs": "phpcs -p src --standard=PSR12 --standard=PHPCompatibility",
+        "phpcs-fix": "phpcbf --standard=PSR12"
+    }
+}
