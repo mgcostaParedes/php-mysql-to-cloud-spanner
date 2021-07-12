@@ -1,8 +1,8 @@
 ## Mysql Parser to Google Cloud Spanner for PHP
 
-[![License](https://poser.pugx.org/mgcosta/spanner-orm-builder/license)](//packagist.org/packages/mgcosta/spanner-orm-builder)
-[![Actions Status](https://github.com/mgcostaParedes/spanner-orm-builder/workflows/CI/badge.svg)](https://github.com/mgcostaParedes/spanner-orm-builder/actions)
-[![codecov](https://codecov.io/gh/mgcostaParedes/spanner-orm-builder/branch/main/graph/badge.svg?token=OEUY7ZDTOP)](https://codecov.io/gh/mgcostaParedes/spanner-orm-builder)
+[![License](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/license)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
+[![Actions Status](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/workflows/CI/badge.svg)](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/actions)
+[![codecov](https://codecov.io/gh/mgcostaParedes/php-mysql-to-cloud-spanner/branch/main/graph/badge.svg?token=L20N2UY9X6)](https://codecov.io/gh/mgcostaParedes/php-mysql-to-cloud-spanner)
 [![Total Downloads](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/downloads)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
 
 
