@@ -1,4 +1,4 @@
-## Mysql Parser to Google Cloud Spanner for PHP
+## MySQL Parser to Google Cloud Spanner for PHP
 
 [![License](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/license)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
 [![Actions Status](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/workflows/CI/badge.svg)](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/actions)
