@@ -129,10 +129,10 @@ class ParserTest extends Unit
         ') PRIMARY KEY (id)';
 
         $this->spannerProcessor->shouldReceive('parseDescribedSchema')
-                            ->andReturn($expectedDDL)->once();
+                            ->andReturn([$expectedDDL])->once();
 
-        $ddl = $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys)->parse();
-        $this->assertEquals($expectedDDL, $ddl);
+        $ddl = $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys)->getDDL();
+        $this->assertEquals([ $expectedDDL ], $ddl);
     }
 
     public function testShouldThrowAParserExceptionWhenCallingParseWithoutSettingRequiredProperties()
@@ -140,6 +140,6 @@ class ParserTest extends Unit
         $this->expectException(ParserException::class);
         $this->expectExceptionMessage("You must define a described table/keys to parse");
 
-        $this->parser->setTableName($this->tableName)->parse();
+        $this->parser->setTableName($this->tableName)->getDDL();
     }
 }

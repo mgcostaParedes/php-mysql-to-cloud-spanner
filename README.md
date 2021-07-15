@@ -16,38 +16,125 @@ Via Composer
 $ composer require mgcosta/mysql-to-cloud-spanner
 ```
 
-### Usage Instructions
+## Usage Instructions
 
-To use the library, you can follow the next example:
+To use the library, you will need an array of the columns from
+MySQL and the respective foreign keys / indexes.
 
-( the example is laravel based, but you can adapt easily 
-for every framework )
+The table array you can use the `Describe` from MySQL, the foreign keys you will need to do something like [that](https://dev.mysql.com/doc/refman/8.0/en/information-schema-key-column-usage-table.html).
 
 ```PHP
+use MgCosta\MysqlParser\Parser;
 
+$schemaParser = new Parser();
+
+$tableName = 'users';
+
+$table = [
+    [
+        'Field' => 'id',
+        'Type' => 'biginteger unsigned',
+        'Null' => 'NO',
+        'Key' => 'PRI',
+        'Default' => null,
+        'Extra' => 'auto_increment'
+    ],
+    [
+        'Field' => 'name',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ],
+    [
+        'Field' => 'email',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => 'UNI',
+        'Default' => null,
+        'Extra' => ''
+    ],
+    [
+        'Field' => 'password',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ]
+];
+
+$keys = [
+    [
+        'TABLE_NAME' => 'users',
+        'COLUMN_NAME' => 'id',
+        'CONSTRAINT_NAME' => 'PRIMARY',
+        'REFERENCED_TABLE_NAME' => null,
+        'REFERENCED_COLUMN_NAME' => null
+    ],
+    [
+        'TABLE_NAME' => 'users',
+        'COLUMN_NAME' => 'email',
+        'CONSTRAINT_NAME' => 'users_email_unique',
+        'REFERENCED_TABLE_NAME' => null,
+        'REFERENCED_COLUMN_NAME' => null
+    ]
+];
+
+$ddl = $schemaParser->setTableName($tableName)
+                    ->setDescribedTable($table)
+                    ->setKeys($keys)
+                    ->getDDL();
+                    
+// it will output an array of DDL statements required to create
+// the necessary elements to compose the table
+// -------------------------------------------
+// array(2) {
+//  [0]=> string(145) "CREATE TABLE users (
+//      id INT64 NOT NULL,
+//      name STRING(255) NOT NULL,
+//      email STRING(255) NOT NULL,
+//      password STRING(255) NOT NULL
+//  ) PRIMARY KEY (id)"
+//  [1]=> string(55) "CREATE UNIQUE INDEX users_email_unique ON users (email)"
+```
+
+The library outputs an array of valid and required statements
+to insert on the Google Cloud Spanner engine.
+
+### Using the Schema Fetcher for MySQL
+
+To help your life to fetch the array we need from MySQL to
+create the spanner statements, you can use the available helper
+on your **PDO** or **ORM / Query Builder**:
+
+The example below is **[Laravel](https://laravel.com/docs/8.x/queries)** based, but you can adapt it easily.
+
+```PHP
 use Illuminate\Support\Facades\DB;
 use MgCosta\MysqlParser\Parser;
-use MgCosta\MysqlParser\MysqlDescriber;
+use MgCosta\MysqlParser\SchemaFetcher;
 
-
-$parser = new Parser();
-$describer = new MysqlDescriber();
+$schemaParser = new Parser();
+$schemaFetcher = new SchemaFetcher();
 
 $tableName = 'users';
 
 // you can extract the table details doing the following
-$table = DB::select(DB::raw($describer->getTableDetails($tableName)));
-$keys = DB::select(DB::raw($describer->getTableKeysDetails($tableName)));
+$table = DB::select(
+    DB::raw($schemaFetcher->getTableDetails($tableName))
+);
+$keys = DB::select(
+    DB::raw($schemaFetcher->getTableKeysDetails($tableName))
+);
 
-$spannerDDL = $parser->setTableName($tableName)
+$ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
-                    ->parse();
-                    
-// $spannerDDL will be the output to
-// create the spanner table                    
-
+                    ->getDDL();
 ```
+
 
 ## Roadmap
 

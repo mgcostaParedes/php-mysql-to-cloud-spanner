@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace MgCosta\MysqlParser;
 
-use MgCosta\MysqlParser\Contracts\DescribeExtractor;
+use MgCosta\MysqlParser\Contracts\SchemaFetchable;
 
-class MysqlDescriber implements DescribeExtractor
+class SchemaFetcher implements SchemaFetchable
 {
     public function getTableDetails(string $tableName): string
     {
