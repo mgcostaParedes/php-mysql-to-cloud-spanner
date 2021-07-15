@@ -99,7 +99,7 @@ class Parser implements MysqlParsable, ParserBuildable
      * @return array
      * @throws ParserException
      */
-    public function getDDL(): array
+    public function toDDL(): array
     {
         if (!empty($this->describedTable) && !empty($this->describedKeys)) {
             return $this->processor->parseDescribedSchema($this);

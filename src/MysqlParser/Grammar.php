@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace MgCosta\MysqlParser;
 
-use MgCosta\MysqlParser\Contracts\SchemaFetchable;
+use MgCosta\MysqlParser\Contracts\GrammarQueryable;
 
-class SchemaFetcher implements SchemaFetchable
+class Grammar implements GrammarQueryable
 {
     public function getTableDetails(string $tableName): string
     {

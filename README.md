@@ -85,7 +85,7 @@ $keys = [
 $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
-                    ->getDDL();
+                    ->toDDL();
                     
 // it will output an array of DDL statements required to create
 // the necessary elements to compose the table
@@ -103,36 +103,39 @@ $ddl = $schemaParser->setTableName($tableName)
 The library outputs an array of valid and required statements
 to insert on the Google Cloud Spanner engine.
 
-### Using the Schema Fetcher for MySQL
+### Using the Grammar Service for MySQL
 
-To help your life to fetch the array we need from MySQL to
-create the spanner statements, you can use the available helper
+To help your life to fetch the data we need from MySQL to
+create the spanner statements, you can use the available service
 on your **PDO** or **ORM / Query Builder**:
+
+This will simply generate a valid query string which you
+can use to fetch the columns & keys details.
 
 The example below is **[Laravel](https://laravel.com/docs/8.x/queries)** based, but you can adapt it easily.
 
 ```PHP
 use Illuminate\Support\Facades\DB;
 use MgCosta\MysqlParser\Parser;
-use MgCosta\MysqlParser\SchemaFetcher;
+use MgCosta\MysqlParser\Grammar;
 
 $schemaParser = new Parser();
-$schemaFetcher = new SchemaFetcher();
+$mysqlGrammar = new Grammar();
 
 $tableName = 'users';
 
 // you can extract the table details doing the following
 $table = DB::select(
-    DB::raw($schemaFetcher->getTableDetails($tableName))
+    DB::raw($mysqlGrammar->getTableDetails($tableName))
 );
 $keys = DB::select(
-    DB::raw($schemaFetcher->getTableKeysDetails($tableName))
+    DB::raw($mysqlGrammar->getTableKeysDetails($tableName))
 );
 
 $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
-                    ->getDDL();
+                    ->toDDL();
 ```
 
 

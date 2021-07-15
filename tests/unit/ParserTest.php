@@ -131,7 +131,7 @@ class ParserTest extends Unit
         $this->spannerProcessor->shouldReceive('parseDescribedSchema')
                             ->andReturn([$expectedDDL])->once();
 
-        $ddl = $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys)->getDDL();
+        $ddl = $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys)->toDDL();
         $this->assertEquals([ $expectedDDL ], $ddl);
     }
 
@@ -140,6 +140,6 @@ class ParserTest extends Unit
         $this->expectException(ParserException::class);
         $this->expectExceptionMessage("You must define a described table/keys to parse");
 
-        $this->parser->setTableName($this->tableName)->getDDL();
+        $this->parser->setTableName($this->tableName)->toDDL();
     }
 }

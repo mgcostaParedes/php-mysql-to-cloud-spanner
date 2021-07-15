@@ -4,5 +4,5 @@ namespace MgCosta\MysqlParser\Contracts;
 
 interface MysqlParsable
 {
-    public function getDDL(): array;
+    public function toDDL(): array;
 }

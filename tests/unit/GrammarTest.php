@@ -3,9 +3,9 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
-use MgCosta\MysqlParser\SchemaFetcher;
+use MgCosta\MysqlParser\Grammar;
 
-class SchemaFetcherTest extends Unit
+class GrammarTest extends Unit
 {
     private $describer;
     private $table = 'test';
@@ -13,7 +13,7 @@ class SchemaFetcherTest extends Unit
     protected function setUp(): void
     {
         parent::setUp();
-        $this->describer = new SchemaFetcher();
+        $this->describer = new Grammar();
     }
 
     public function testShouldGetDescribedTableColumnsSyntax()
