@@ -103,7 +103,7 @@ $ddl = $schemaParser->setTableName($tableName)
 The library outputs an array of valid and required statements
 to insert on the Google Cloud Spanner engine.
 
-### Using the Grammar Service for MySQL
+### Using the Dialect Service for MySQL
 
 To help your life to fetch the data we need from MySQL to
 create the spanner statements, you can use the available service
@@ -117,19 +117,19 @@ The example below is **[Laravel](https://laravel.com/docs/8.x/queries)** based, 
 ```PHP
 use Illuminate\Support\Facades\DB;
 use MgCosta\MysqlParser\Parser;
-use MgCosta\MysqlParser\Grammar;
+use MgCosta\MysqlParser\Dialect;
 
 $schemaParser = new Parser();
-$mysqlGrammar = new Grammar();
+$mysqlDialect = new Dialect();
 
 $tableName = 'users';
 
 // you can extract the table details doing the following
 $table = DB::select(
-    DB::raw($mysqlGrammar->getTableDetails($tableName))
+    DB::raw($mysqlDialect->generateTableDetails($tableName))
 );
 $keys = DB::select(
-    DB::raw($mysqlGrammar->getTableKeysDetails($tableName))
+    DB::raw($mysqlDialect->generateTableKeysDetails($tableName))
 );
 
 $ddl = $schemaParser->setTableName($tableName)
