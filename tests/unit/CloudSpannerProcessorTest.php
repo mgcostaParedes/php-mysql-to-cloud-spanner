@@ -520,7 +520,7 @@ class CloudSpannerProcessorTest extends Unit
         );
     }
 
-    public function testShouldCompileAUniqueIndexSuccessfully()
+    public function testShouldCompileAnUniqueIndexSuccessfully()
     {
         $field = [
             $this->defaultPrimaryKey,
