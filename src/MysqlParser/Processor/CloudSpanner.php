@@ -34,6 +34,13 @@ class CloudSpanner implements Processable
     protected $foreignKeys = [];
 
     /**
+     * The array which will store the unique indexes to the spanner ddl
+     *
+     * @var array
+     */
+    protected $uniqueIndexes = [];
+
+    /**
      * The maximum length for strings to cloud spanner
      *
      * @var int
@@ -64,10 +71,10 @@ class CloudSpanner implements Processable
      * Method to parse the describable table from PHP PDO Mysql to raw cloud spanner ddl
      *
      * @param Parser $builder
-     * @return string
+     * @return array
      * @throws ParserException
      */
-    public function parseDescribedSchema(ParserBuildable $builder): string
+    public function parseDescribedSchema(ParserBuildable $builder): array
     {
         $tableDDL = 'CREATE TABLE ' . $builder->getTableName() . ' (' . PHP_EOL;
 
@@ -107,7 +114,13 @@ class CloudSpanner implements Processable
             throw new ParserException("The table " . $builder->getTableName() . " must have a primary key!");
         }
 
-        return $tableDDL . 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ")";
+        $tableDDL .= 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ")";
+
+        if (!empty($this->uniqueIndexes)) {
+            return array_merge([ $tableDDL ], $this->compileUniqueIndexes());
+        }
+
+        return [ $tableDDL ];
     }
 
     private function compileChar(array $column): string
@@ -287,17 +300,31 @@ class CloudSpanner implements Processable
         if ($type === 'MUL') {
             $this->foreignKeys[] = $keyDetails;
         }
+
+        if ($type === 'UNI') {
+            $this->uniqueIndexes[] = $keyDetails;
+        }
     }
 
     private function compileForeignKeys(): string
     {
         $constraints = ',' . PHP_EOL;
-        foreach ($this->foreignKeys as $index => $foreign) {
-            $commaAppends = ($index !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
+        foreach ($this->foreignKeys as $key => $foreign) {
+            $commaAppends = ($key !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
             $constraints .= 'CONSTRAINT ' . $foreign['CONSTRAINT_NAME'] . ' FOREIGN KEY (' . $foreign['COLUMN_NAME'] .
                 ')' . ' REFERENCES ' . $foreign['REFERENCED_TABLE_NAME'] .  ' (' . $foreign['REFERENCED_COLUMN_NAME'] .
                 ')' . $commaAppends;
         }
         return $constraints . PHP_EOL . ') ';
+    }
+
+    private function compileUniqueIndexes(): array
+    {
+        $indexes = [];
+        foreach ($this->uniqueIndexes as $uniqueIndex) {
+            $indexes[] = 'CREATE UNIQUE INDEX ' . $uniqueIndex['CONSTRAINT_NAME'] . ' ON ' .
+                $uniqueIndex['TABLE_NAME'] . ' (' . $uniqueIndex['COLUMN_NAME'] . ')';
+        }
+        return $indexes;
     }
 }

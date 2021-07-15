@@ -511,11 +511,49 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field, $key);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
-            'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
+            [ 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
             'id INT64 NOT NULL,' . PHP_EOL .
             'id_travel INT64 NOT NULL,' . PHP_EOL .
             'CONSTRAINT test_id_travel_foreign FOREIGN KEY (id_travel) REFERENCES travels (id)' . PHP_EOL .
-            ') PRIMARY KEY (id)',
+            ') PRIMARY KEY (id)' ],
+            $sql
+        );
+    }
+
+    public function testShouldCompileAnUniqueIndexSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => 'UNI',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $key = [
+            [
+                'TABLE_NAME' => $this->tableName,
+                'COLUMN_NAME' => 'email',
+                'CONSTRAINT_NAME' => $this->tableName . '_email_unique',
+                'REFERENCED_TABLE_NAME' => null,
+                'REFERENCED_COLUMN_NAME' => null
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field, $key);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals(
+            [
+                'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
+                'id INT64 NOT NULL,' . PHP_EOL .
+                'email STRING(255) NOT NULL' . PHP_EOL .
+                ') PRIMARY KEY (id)',
+                'CREATE UNIQUE INDEX ' . $this->tableName . '_email_unique ON ' . $this->tableName . ' (email)'
+            ],
             $sql
         );
     }
@@ -532,13 +570,13 @@ class CloudSpannerProcessorTest extends Unit
             ->andReturn($keys)->once();
     }
 
-    private function assertDefaultTable(string $column, string $sql)
+    private function assertDefaultTable(string $column, array $sql)
     {
         $this->assertEquals(
-            'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
+            [ 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
             'id INT64 NOT NULL,' . PHP_EOL .
             $column . PHP_EOL .
-            ') PRIMARY KEY (id)',
+            ') PRIMARY KEY (id)' ],
             $sql
         );
     }

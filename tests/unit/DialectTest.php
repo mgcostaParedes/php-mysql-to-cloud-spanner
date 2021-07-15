@@ -3,9 +3,9 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
-use MgCosta\MysqlParser\MysqlDescriber;
+use MgCosta\MysqlParser\Dialect;
 
-class MysqlDescriberTest extends Unit
+class DialectTest extends Unit
 {
     private $describer;
     private $table = 'test';
@@ -13,14 +13,14 @@ class MysqlDescriberTest extends Unit
     protected function setUp(): void
     {
         parent::setUp();
-        $this->describer = new MysqlDescriber();
+        $this->describer = new Dialect();
     }
 
     public function testShouldGetDescribedTableColumnsSyntax()
     {
         $this->assertEquals(
             'DESCRIBE ' . $this->table,
-            $this->describer->getTableDetails($this->table)
+            $this->describer->generateTableDetails($this->table)
         );
     }
 
@@ -29,7 +29,7 @@ class MysqlDescriberTest extends Unit
         $this->assertEquals(
             "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
                         FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $this->table . "'",
-            $this->describer->getTableKeysDetails($this->table)
+            $this->describer->generateTableKeysDetails($this->table)
         );
     }
 }
