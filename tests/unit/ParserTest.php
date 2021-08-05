@@ -100,6 +100,41 @@ class ParserTest extends Unit
         $this->assertEquals($fields, $this->parser->getDescribedTable());
     }
 
+    public function testShouldParsePropertiesToArrayWhenAnEntryIsAnObject()
+    {
+        $this->parser->setTableName($this->tableName);
+
+        $fields = [
+            (object)$this->defaultPrimaryKey,
+            [
+                'Field' => 'airline',
+                'Type' => 'varchar(255)',
+                'Null' => 'YES',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+        $keys = [
+            [
+                'TABLE_NAME' => 'flights',
+                'COLUMN_NAME' => 'id',
+                'CONSTRAINT_NAME' => 'PRIMARY',
+                'REFERENCED_TABLE_NAME' => null,
+                'REFERENCED_COLUMN_NAME' => null
+            ]
+        ];
+
+        $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys);
+
+        $this->assertEquals($this->tableName, $this->parser->getTableName());
+        $this->assertEquals($keys, $this->parser->getDescribedKeys());
+
+        $fieldsParsedToArray = $fields;
+        $fieldsParsedToArray[0] = (array)$fieldsParsedToArray[0];
+        $this->assertEquals($fieldsParsedToArray, $this->parser->getDescribedTable());
+    }
+
     public function testShouldParseAMysqlBuilderSuccessfully()
     {
         $fields = [
