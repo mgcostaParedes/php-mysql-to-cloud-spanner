@@ -67,7 +67,7 @@ class Parser implements MysqlParsable, ParserBuildable
     public function setDescribedTable(array $table): Parser
     {
         $requiredKeys = ['Field', 'Type', 'Null', 'Key', 'Default', 'Extra'];
-        $this->validateArrayKeys($table, $requiredKeys, 'described table');
+        $table = $this->parseAndValidateArrayKeys($table, $requiredKeys, 'described table');
 
         $this->describedTable = $table;
         return $this;
@@ -84,7 +84,7 @@ class Parser implements MysqlParsable, ParserBuildable
             'TABLE_NAME', 'COLUMN_NAME', 'CONSTRAINT_NAME',
             'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME'
         ];
-        $this->validateArrayKeys($keys, $requiredKeys, 'described keys');
+        $keys = $this->parseAndValidateArrayKeys($keys, $requiredKeys, 'described keys');
 
         $this->describedKeys = $keys;
         return $this;
@@ -108,12 +108,17 @@ class Parser implements MysqlParsable, ParserBuildable
         throw new ParserException("You must define a described table/keys to parse");
     }
 
-    private function validateArrayKeys(array $data, array $keys, string $origin)
+    private function parseAndValidateArrayKeys(array $data, array $keys, string $origin): array
     {
-        foreach ($data as $column) {
+        foreach ($data as $key => $column) {
+            if (is_object($column)) {
+                $column = (array)$column;
+                $data[$key] = $column;
+            }
             if (array_diff_key($column, array_flip($keys))) {
                 throw new RuntimeException("There's invalid column keys for the " . $origin);
             }
         }
+        return $data;
     }
 }

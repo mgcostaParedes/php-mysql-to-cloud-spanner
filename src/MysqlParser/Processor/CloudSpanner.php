@@ -64,7 +64,7 @@ class CloudSpanner implements Processable
      */
     private $typesAsInt64 = [
         'bigintegerunsigned', 'mediumintegerunsigned', 'smallintegerunsigned', 'bigint',
-        'mediumint', 'smallint', 'intunsigned'
+        'mediumint', 'smallint', 'intunsigned', 'bigintunsigned', 'mediumintunsigned', 'smallintunsigned'
     ];
 
     /**
