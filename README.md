@@ -150,6 +150,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 ## Credits
 
 - [Miguel Costa][https://github.com/mgcostaParedes]
+- [Mike Slowik][https://github.com/sl0wik]
 
 ## License
 
