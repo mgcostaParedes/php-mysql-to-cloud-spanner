@@ -25,14 +25,14 @@ class Parser implements MysqlParsable, ParserBuildable
      *
      * @var array
      */
-    protected $describedTable;
+    protected $describedTable = [];
 
     /**
      * The described table keys from MySQL
      *
      * @var array
      */
-    protected $describedKeys;
+    protected $describedKeys = [];
 
     /**
      * The string with mysql schema to parse
@@ -101,11 +101,11 @@ class Parser implements MysqlParsable, ParserBuildable
      */
     public function toDDL(): array
     {
-        if (!empty($this->describedTable) && !empty($this->describedKeys)) {
+        if (!empty($this->describedTable)) {
             return $this->processor->parseDescribedSchema($this);
         }
 
-        throw new ParserException("You must define a described table/keys to parse");
+        throw new ParserException("You must define a described table to parse");
     }
 
     private function parseAndValidateArrayKeys(array $data, array $keys, string $origin): array

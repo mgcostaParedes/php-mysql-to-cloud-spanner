@@ -173,7 +173,7 @@ class ParserTest extends Unit
     public function testShouldThrowAParserExceptionWhenCallingParseWithoutSettingRequiredProperties()
     {
         $this->expectException(ParserException::class);
-        $this->expectExceptionMessage("You must define a described table/keys to parse");
+        $this->expectExceptionMessage("You must define a described table to parse");
 
         $this->parser->setTableName($this->tableName)->toDDL();
     }

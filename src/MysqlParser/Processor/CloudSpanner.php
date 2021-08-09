@@ -111,7 +111,7 @@ class CloudSpanner implements Processable
 
             $tableDDL .= $this->$method($column);
 
-            // check if has keys to append
+            // check if it has keys to append
             if (!empty($column['Key'])) {
                 $this->assignColumnKey($builder, $column['Field'], $column['Key']);
             }
@@ -140,7 +140,7 @@ class CloudSpanner implements Processable
     private function compileVarchar(array $column): string
     {
         $stringCol = $column['Field'] . ' STRING(';
-        // if has no details assign default size as 255
+        // if it has no details assign default size as 255
         $stringCol .= !empty($column['Details']) ? $column['Details'][1] : '255';
 
         return $stringCol . ')' . $this->resolveAppends($column);
@@ -251,7 +251,6 @@ class CloudSpanner implements Processable
 
     private function compileBlob(array $column): string
     {
-        // LONG BLOB BY DEFAULT
         return $column['Field'] . ' BYTES(10485760)' . $this->resolveAppends($column);
     }
 
