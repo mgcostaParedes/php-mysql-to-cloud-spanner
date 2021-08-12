@@ -7,7 +7,7 @@ namespace MgCosta\MysqlParser\Processor;
 use InvalidArgumentException;
 use MgCosta\MysqlParser\Contracts\ParserBuildable;
 use MgCosta\MysqlParser\Contracts\Processable;
-use MgCosta\MysqlParser\Exceptions\ParserException;
+use MgCosta\MysqlParser\Dialect;
 use MgCosta\MysqlParser\Parser;
 
 class CloudSpanner implements Processable
@@ -39,6 +39,13 @@ class CloudSpanner implements Processable
      * @var array
      */
     protected $uniqueIndexes = [];
+
+    /**
+     * The array which will store the secondary indexes to the spanner ddl
+     *
+     * @var array
+     */
+    protected $secondaryIndexes = [];
 
     /**
      * The maximum length for strings to cloud spanner
@@ -77,18 +84,34 @@ class CloudSpanner implements Processable
     ];
 
     /**
+     * The described columns from MySQL
+     *
+     * @var string[]
+     */
+    private $columns;
+
+    /**
+     * The name of table to create
+     *
+     * @var string
+     */
+    private $tableName;
+
+    /**
      * Method to parse the describable table from PHP PDO Mysql to raw cloud spanner ddl
      *
      * @param Parser $builder
      * @return array
-     * @throws ParserException
      */
     public function parseDescribedSchema(ParserBuildable $builder): array
     {
-        $tableDDL = 'CREATE TABLE ' . $builder->getTableName() . ' (' . PHP_EOL;
+        $this->tableName = $builder->getTableName();
+        $this->columns = $builder->getDescribedTable();
+        $this->assignKeys($builder);
 
-        $schema = $builder->getDescribedTable();
-        foreach ($schema as $index => $column) {
+        $tableDDL = 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL;
+
+        foreach ($this->columns as $index => $column) {
             // find extra details from the column type inside parenthesis
             preg_match('/\\((.*?)\\)/', $column['Type'], $columnTypeDetails);
             // remove extra details from the type
@@ -99,7 +122,7 @@ class CloudSpanner implements Processable
             $method = 'compile' . ucfirst($type);
             // compile column schema to cloud spanner ddl
             $column['Details'] = $columnTypeDetails;
-            $column['isLastOne'] = $index === array_key_last($schema);
+            $column['isLastOne'] = $index === array_key_last($this->columns);
 
             if (in_array($type, $this->unavailableDataTypes)) {
                 $method = 'compileUnavailableTypes';
@@ -110,26 +133,22 @@ class CloudSpanner implements Processable
             }
 
             $tableDDL .= $this->$method($column);
-
-            // check if it has keys to append
-            if (!empty($column['Key'])) {
-                $this->assignColumnKey($builder, $column['Field'], $column['Key']);
-            }
         }
 
         $tableDDL .= !empty($this->foreignKeys) ? $this->compileForeignKeys() : PHP_EOL . ') ';
-
-        if (empty($this->primaryKeys)) {
-            throw new ParserException("The table " . $builder->getTableName() . " must have a primary key!");
-        }
-
         $tableDDL .= 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ")";
 
+        $output = [ $tableDDL ];
+
         if (!empty($this->uniqueIndexes)) {
-            return array_merge([ $tableDDL ], $this->compileUniqueIndexes());
+            $output = array_merge($output, $this->compileUniqueIndexes());
         }
 
-        return [ $tableDDL ];
+        if (!empty($this->secondaryIndexes)) {
+            $output = array_merge($output, $this->compileSecondaryIndexes());
+        }
+
+        return $output;
     }
 
     private function compileChar(array $column): string
@@ -285,6 +304,21 @@ class CloudSpanner implements Processable
         return $str . ',' . PHP_EOL;
     }
 
+    protected function assignKeys(ParserBuildable $builder): void
+    {
+        foreach ($this->columns as $column) {
+            if (!empty($column['Key'])) {
+                $this->assignColumnKey($builder, $column['Field'], $column['Key']);
+            }
+        }
+
+        // if no primary key founded on table, we should assign a default id column
+        if (empty($this->primaryKeys)) {
+            $this->primaryKeys[] = Dialect::DEFAULT_PRIMARY_KEY;
+            array_unshift($this->columns, Dialect::DEFAULT_PRIMARY_KEY_PROPS);
+        }
+    }
+
     protected function assignColumnKey(ParserBuildable $builder, string $field, string $type): void
     {
         if (!in_array($type, $this->availableMysqlKeys, true)) {
@@ -294,7 +328,7 @@ class CloudSpanner implements Processable
         $keys = $builder->getDescribedKeys();
         $fieldArrayIndex = array_search($field, array_column($keys, 'COLUMN_NAME'));
 
-        if ($fieldArrayIndex === false && $type !== 'PRI') {
+        if ($fieldArrayIndex === false && $type !== 'PRI' && $type !== 'MUL') {
             throw new InvalidArgumentException('Details for the key ' . $field . ' not found, provide it on "setKeys"');
         }
 
@@ -305,8 +339,12 @@ class CloudSpanner implements Processable
 
         $keyDetails = $keys[$fieldArrayIndex] ?? [];
 
-        if ($type === 'MUL') {
+        if ($type === 'MUL' && !empty($keyDetails)) {
             $this->foreignKeys[] = $keyDetails;
+        }
+
+        if ($type === 'MUL' && empty($keyDetails)) {
+            $this->secondaryIndexes[] = $field;
         }
 
         if ($type === 'UNI') {
@@ -329,9 +367,20 @@ class CloudSpanner implements Processable
     private function compileUniqueIndexes(): array
     {
         $indexes = [];
-        foreach ($this->uniqueIndexes as $uniqueIndex) {
-            $indexes[] = 'CREATE UNIQUE INDEX ' . $uniqueIndex['CONSTRAINT_NAME'] . ' ON ' .
-                $uniqueIndex['TABLE_NAME'] . ' (' . $uniqueIndex['COLUMN_NAME'] . ')';
+        foreach ($this->uniqueIndexes as $index) {
+            $indexes[] = 'CREATE UNIQUE INDEX ' . $index['CONSTRAINT_NAME'] . ' ON ' .
+                $index['TABLE_NAME'] . ' (' . $index['COLUMN_NAME'] . ')';
+        }
+        return $indexes;
+    }
+
+    private function compileSecondaryIndexes(): array
+    {
+        $indexes = [];
+        foreach ($this->secondaryIndexes as $index) {
+            $indexName = ucfirst($this->tableName) . 'By' . ucfirst($index);
+            $indexes[] = 'CREATE INDEX ' . $indexName . ' ON ' .
+                $this->tableName . '(' . $index . ')';
         }
         return $indexes;
     }

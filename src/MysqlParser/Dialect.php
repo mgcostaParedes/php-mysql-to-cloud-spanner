@@ -8,6 +8,23 @@ use MgCosta\MysqlParser\Contracts\DialectGenerator;
 
 class Dialect implements DialectGenerator
 {
+    /**
+     * The default column name for a PK when there's no PK on a MySQL Table
+     */
+    const DEFAULT_PRIMARY_KEY = 'id';
+
+    /**
+     * The default described column for a PK when there's no PK on a MySQL Table
+     */
+    const DEFAULT_PRIMARY_KEY_PROPS = [
+        'Field' => 'id',
+        'Type' => 'biginteger unsigned',
+        'Null' => 'NO',
+        'Key' => "PRI",
+        'Default' => null,
+        'Extra' => 'auto_increment'
+    ];
+
     public function generateTableDetails(string $tableName): string
     {
         return 'DESCRIBE ' . $tableName;

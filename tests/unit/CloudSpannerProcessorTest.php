@@ -3,7 +3,6 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
-use MgCosta\MysqlParser\Exceptions\ParserException;
 use MgCosta\MysqlParser\Parser;
 use MgCosta\MysqlParser\Processor\CloudSpanner;
 use Mockery as m;
@@ -28,24 +27,6 @@ class CloudSpannerProcessorTest extends Unit
         parent::setUp();
         $this->processor = new CloudSpanner();
         $this->parserBuilder = m::mock(Parser::class);
-    }
-
-    public function testShouldThrowAParserExceptionWhenCallingParserWithoutPrimaryKey()
-    {
-        $this->expectException(ParserException::class);
-        $field = [
-            [
-                'Field' => 'airline',
-                'Type' => 'varchar(255)',
-                'Null' => 'YES',
-                'Key' => '',
-                'Default' => null,
-                'Extra' => ''
-            ]
-        ];
-
-        $this->setupParserMocksWithoutIndexes($field);
-        $this->processor->parseDescribedSchema($this->parserBuilder);
     }
 
     public function testShouldCompileVarcharSuccessfully()
@@ -466,10 +447,28 @@ class CloudSpannerProcessorTest extends Unit
         $this->processor->parseDescribedSchema($this->parserBuilder);
     }
 
-    public function testShouldThrowAnInvalidArgumentExceptionWhenAssigningKeyWithoutDescribed()
+    public function testShouldThrowAnInvalidArgumentExceptionWhenAssigningUNIKeyWithoutDescribed()
     {
         $this->expectException(\InvalidArgumentException::class);
         $field = [
+            [
+                'Field' => 'id_travel',
+                'Type' => 'int unsigned',
+                'Null' => 'NO',
+                'Key' => "UNI",
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+        $this->processor->parseDescribedSchema($this->parserBuilder);
+    }
+
+    public function testShouldCompileWithASecondaryIndexWhenAssigningMULKeyWithoutDescribedKey()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
             [
                 'Field' => 'id_travel',
                 'Type' => 'int unsigned',
@@ -480,8 +479,9 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
 
-        $this->setupParserMocksWithoutIndexes($field);
-        $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->setupParserMocksWithoutIndexes($field, []);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals('CREATE INDEX TestById_travel ON test(id_travel)', $sql[1]);
     }
 
     public function testShouldCompileAForeignKeySuccessfully()
@@ -555,6 +555,29 @@ class CloudSpannerProcessorTest extends Unit
                 'CREATE UNIQUE INDEX ' . $this->tableName . '_email_unique ON ' . $this->tableName . ' (email)'
             ],
             $sql
+        );
+    }
+
+    public function testShouldCompileADescribedTableWithoutPKSuccessfullyWithDefaultPrimaryKey()
+    {
+        $field = [
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+        $this->setupParserMocksWithoutIndexes($field, []);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals(
+            'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
+            'id INT64 NOT NULL,' . PHP_EOL .
+            'email STRING(255) NOT NULL' . PHP_EOL .
+            ') PRIMARY KEY (id)',
+            $sql[0]
         );
     }
 
