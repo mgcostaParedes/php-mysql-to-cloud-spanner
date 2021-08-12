@@ -11,12 +11,12 @@ class Dialect implements DialectGenerator
     /**
      * The default column name for a PK when there's no PK on a MySQL Table
      */
-    const DEFAULT_PRIMARY_KEY = 'id';
+    public const DEFAULT_PRIMARY_KEY = 'id';
 
     /**
      * The default described column for a PK when there's no PK on a MySQL Table
      */
-    const DEFAULT_PRIMARY_KEY_PROPS = [
+    public const DEFAULT_PRIMARY_KEY_PROPS = [
         'Field' => 'id',
         'Type' => 'biginteger unsigned',
         'Null' => 'NO',
