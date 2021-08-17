@@ -581,6 +581,32 @@ class CloudSpannerProcessorTest extends Unit
         );
     }
 
+    public function testShouldResetTheTableDetailsAndPreventDuplicateKeysWhenSchemaIsParsed()
+    {
+        $field = [
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+        $this->setupParserMocksWithoutIndexes($field, []);
+        $firstSql = $this->processor->parseDescribedSchema($this->parserBuilder);
+
+        $expectedDDL = 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
+            'id INT64 NOT NULL,' . PHP_EOL .
+            'email STRING(255) NOT NULL' . PHP_EOL .
+            ') PRIMARY KEY (id)';
+
+        $this->assertEquals($expectedDDL, $firstSql[0]);
+
+        $secondSql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals($expectedDDL, $secondSql[0]);
+    }
+
     private function setupParserMocksWithoutIndexes(array $table, array $keys = [])
     {
         $this->parserBuilder->shouldReceive('setDescribedTable')
