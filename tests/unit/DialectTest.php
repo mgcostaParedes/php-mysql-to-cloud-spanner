@@ -19,7 +19,7 @@ class DialectTest extends Unit
     public function testShouldGetDescribedTableColumnsSyntax()
     {
         $this->assertEquals(
-            'DESCRIBE ' . $this->table,
+            'DESCRIBE ' . $this->table . ';',
             $this->describer->generateTableDetails($this->table)
         );
     }
@@ -28,7 +28,7 @@ class DialectTest extends Unit
     {
         $this->assertEquals(
             "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
-                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $this->table . "'",
+                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $this->table . "';",
             $this->describer->generateTableKeysDetails($this->table)
         );
     }

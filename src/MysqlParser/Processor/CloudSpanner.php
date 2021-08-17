@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace MgCosta\MysqlParser\Processor;
 
 use InvalidArgumentException;
+use MgCosta\MysqlParser\Contracts\Flushable;
 use MgCosta\MysqlParser\Contracts\ParserBuildable;
 use MgCosta\MysqlParser\Contracts\Processable;
 use MgCosta\MysqlParser\Dialect;
 use MgCosta\MysqlParser\Parser;
 
-class CloudSpanner implements Processable
+class CloudSpanner implements Processable, Flushable
 {
     /**
      * The available mysql keys parsed by describe method
@@ -148,7 +149,20 @@ class CloudSpanner implements Processable
             $output = array_merge($output, $this->compileSecondaryIndexes());
         }
 
+        // reset the table details on object before returns the ddl
+        $this->flush();
+
         return $output;
+    }
+
+    public function flush(): void
+    {
+        $this->tableName = null;
+        $this->columns = null;
+        $this->primaryKeys = [];
+        $this->secondaryIndexes = [];
+        $this->foreignKeys = [];
+        $this->uniqueIndexes = [];
     }
 
     private function compileChar(array $column): string
@@ -337,7 +351,10 @@ class CloudSpanner implements Processable
             return;
         }
 
-        $keyDetails = $keys[$fieldArrayIndex] ?? [];
+        $keyDetails = [];
+        if ($fieldArrayIndex !== false) {
+            $keyDetails = $keys[$fieldArrayIndex];
+        }
 
         if ($type === 'MUL' && !empty($keyDetails)) {
             $this->foreignKeys[] = $keyDetails;
