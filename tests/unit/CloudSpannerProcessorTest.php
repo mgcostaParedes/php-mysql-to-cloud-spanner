@@ -481,7 +481,7 @@ class CloudSpannerProcessorTest extends Unit
 
         $this->setupParserMocksWithoutIndexes($field, []);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertEquals('CREATE INDEX TestById_travel ON test(id_travel)', $sql[1]);
+        $this->assertEquals('CREATE INDEX TestById_travel ON test(id_travel);', $sql[1]);
     }
 
     public function testShouldCompileAForeignKeySuccessfully()
@@ -515,7 +515,7 @@ class CloudSpannerProcessorTest extends Unit
             'id INT64 NOT NULL,' . PHP_EOL .
             'id_travel INT64 NOT NULL,' . PHP_EOL .
             'CONSTRAINT test_id_travel_foreign FOREIGN KEY (id_travel) REFERENCES travels (id)' . PHP_EOL .
-            ') PRIMARY KEY (id)' ],
+            ') PRIMARY KEY (id);' ],
             $sql
         );
     }
@@ -551,8 +551,8 @@ class CloudSpannerProcessorTest extends Unit
                 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
                 'id INT64 NOT NULL,' . PHP_EOL .
                 'email STRING(255) NOT NULL' . PHP_EOL .
-                ') PRIMARY KEY (id)',
-                'CREATE UNIQUE INDEX ' . $this->tableName . '_email_unique ON ' . $this->tableName . ' (email)'
+                ') PRIMARY KEY (id);',
+                'CREATE UNIQUE INDEX ' . $this->tableName . '_email_unique ON ' . $this->tableName . ' (email);'
             ],
             $sql
         );
@@ -576,7 +576,7 @@ class CloudSpannerProcessorTest extends Unit
             'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
             'id INT64 NOT NULL,' . PHP_EOL .
             'email STRING(255) NOT NULL' . PHP_EOL .
-            ') PRIMARY KEY (id)',
+            ') PRIMARY KEY (id);',
             $sql[0]
         );
     }
@@ -599,7 +599,7 @@ class CloudSpannerProcessorTest extends Unit
         $expectedDDL = 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
             'id INT64 NOT NULL,' . PHP_EOL .
             'email STRING(255) NOT NULL' . PHP_EOL .
-            ') PRIMARY KEY (id)';
+            ') PRIMARY KEY (id);';
 
         $this->assertEquals($expectedDDL, $firstSql[0]);
 
@@ -625,7 +625,7 @@ class CloudSpannerProcessorTest extends Unit
             [ 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL .
             'id INT64 NOT NULL,' . PHP_EOL .
             $column . PHP_EOL .
-            ') PRIMARY KEY (id)' ],
+            ') PRIMARY KEY (id);' ],
             $sql
         );
     }

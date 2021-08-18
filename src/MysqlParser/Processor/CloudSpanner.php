@@ -137,7 +137,7 @@ class CloudSpanner implements Processable, Flushable
         }
 
         $tableDDL .= !empty($this->foreignKeys) ? $this->compileForeignKeys() : PHP_EOL . ') ';
-        $tableDDL .= 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ")";
+        $tableDDL .= 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ");";
 
         $output = [ $tableDDL ];
 
@@ -386,7 +386,7 @@ class CloudSpanner implements Processable, Flushable
         $indexes = [];
         foreach ($this->uniqueIndexes as $index) {
             $indexes[] = 'CREATE UNIQUE INDEX ' . $index['CONSTRAINT_NAME'] . ' ON ' .
-                $index['TABLE_NAME'] . ' (' . $index['COLUMN_NAME'] . ')';
+                $index['TABLE_NAME'] . ' (' . $index['COLUMN_NAME'] . ');';
         }
         return $indexes;
     }
@@ -397,7 +397,7 @@ class CloudSpanner implements Processable, Flushable
         foreach ($this->secondaryIndexes as $index) {
             $indexName = ucfirst($this->tableName) . 'By' . ucfirst($index);
             $indexes[] = 'CREATE INDEX ' . $indexName . ' ON ' .
-                $this->tableName . '(' . $index . ')';
+                $this->tableName . '(' . $index . ');';
         }
         return $indexes;
     }
