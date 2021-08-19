@@ -149,7 +149,27 @@ class CloudSpannerProcessorTest extends Unit
         $this->assertDefaultTable('price FLOAT64', $sql);
     }
 
-    public function testShouldCompileBooleanSuccessfully()
+    public function testShouldCompileTinyIntHigherThan1ToIntSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'active',
+                'Type' => 'tinyint(2)',
+                'Null' => 'YES',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('active INT64', $sql);
+    }
+
+    public function testShouldCompileTinyInt1ToBooleanSuccessfully()
     {
         $field = [
             $this->defaultPrimaryKey,

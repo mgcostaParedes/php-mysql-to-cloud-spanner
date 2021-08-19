@@ -79,6 +79,7 @@ class CloudSpanner implements Processable, Flushable
         'smallint',
         'int',
         'intunsigned',
+        'tinyintunsigned',
         'bigintunsigned',
         'mediumintunsigned',
         'smallintunsigned'
@@ -196,6 +197,9 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileTinyint(array $column): string
     {
+        if (!empty($column['Details']) && (int)$column['Details'][1] > 1) {
+            return $this->compileInteger($column);
+        }
         return $this->compileBoolean($column);
     }
 

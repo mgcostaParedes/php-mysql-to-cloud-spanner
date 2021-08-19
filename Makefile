@@ -10,7 +10,6 @@ DOCK_X_APP := $(DOCKER_C) exec $(APP_NAME)
 ADAM_CONAINTER:= docker run --rm -v "$(PWD)":/app -w /app adamculp/php-code-quality:latest
 PHP_METRICS := /usr/local/lib/php-code-quality/vendor/bin/phpmetrics
 
-VENDOR_PHINX := vendor/bin/phinx
 VENDOR_CODECEPT := vendor/bin/codecept
 VENDOR_PHPCS := /usr/local/lib/php-code-quality/vendor/bin/phpcs
 VENDOR_PHPCBF := /usr/local/lib/php-code-quality/vendor/bin/phpcbf
