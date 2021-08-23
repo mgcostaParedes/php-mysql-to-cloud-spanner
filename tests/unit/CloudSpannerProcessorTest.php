@@ -449,6 +449,26 @@ class CloudSpannerProcessorTest extends Unit
         $this->assertDefaultTable('photo BYTES(10485760)', $sql);
     }
 
+    public function testShouldCompileDefaultMethodWithoutUnsignedWhenTheresUnsignedOnType()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'airline',
+                'Type' => 'decimal(8,4) unsigned',
+                'Null' => 'YES',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('airline NUMERIC', $sql);
+    }
+
     public function testShouldThrowAnInvalidArgumentExceptionWhenAssigningInvalidKey()
     {
         $this->expectException(\InvalidArgumentException::class);

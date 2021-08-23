@@ -134,6 +134,11 @@ class CloudSpanner implements Processable, Flushable
                 $method = 'compileInteger';
             }
 
+            // if there's no method available and comes from unsigned, attribute the default method
+            if (!method_exists($this, $method) && substr($method, -8) === 'unsigned') {
+                $method = substr($method, 0, -8);
+            }
+
             $tableDDL .= $this->$method($column);
         }
 
