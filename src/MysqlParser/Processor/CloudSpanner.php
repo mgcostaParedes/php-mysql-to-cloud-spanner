@@ -111,7 +111,7 @@ class CloudSpanner implements Processable, Flushable
         $this->columns = $builder->getDescribedTable();
         $this->assignKeys($builder);
 
-        $tableDDL = 'CREATE TABLE ' . $this->tableName . ' (' . PHP_EOL;
+        $tableDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL;
 
         foreach ($this->columns as $index => $column) {
             // find extra details from the column type inside parenthesis
