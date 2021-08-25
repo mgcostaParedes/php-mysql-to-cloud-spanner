@@ -46,7 +46,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('airline STRING(255)', $sql);
+        $this->assertDefaultTable('`airline` STRING(255)', $sql);
     }
 
     public function testShouldCompileCharSuccessfully()
@@ -66,7 +66,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('airline STRING(100)', $sql);
+        $this->assertDefaultTable('`airline` STRING(100)', $sql);
     }
 
     public function testShouldCompileIntegerSuccessfully()
@@ -86,7 +86,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('value INT64 NOT NULL', $sql);
+        $this->assertDefaultTable('`value` INT64 NOT NULL', $sql);
     }
 
     public function testShouldCompileAMysqlTypeToIntegerSuccessfully()
@@ -106,7 +106,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('value INT64 NOT NULL', $sql);
+        $this->assertDefaultTable('`value` INT64 NOT NULL', $sql);
     }
 
     public function testShouldCompileDecimalSuccessfully()
@@ -126,7 +126,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('price NUMERIC', $sql);
+        $this->assertDefaultTable('`price` NUMERIC', $sql);
     }
 
     public function testShouldCompileDoubleAndFloatSuccessfully()
@@ -146,7 +146,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('price FLOAT64', $sql);
+        $this->assertDefaultTable('`price` FLOAT64', $sql);
     }
 
     public function testShouldCompileTinyIntHigherThan1ToIntSuccessfully()
@@ -166,27 +166,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('active INT64', $sql);
-    }
-
-    public function testShouldCompileTinyInt1ToBooleanSuccessfully()
-    {
-        $field = [
-            $this->defaultPrimaryKey,
-            [
-                'Field' => 'active',
-                'Type' => 'tinyint(1)',
-                'Null' => 'YES',
-                'Key' => '',
-                'Default' => null,
-                'Extra' => ''
-            ]
-        ];
-
-        $this->setupParserMocksWithoutIndexes($field);
-
-        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('active BOOL', $sql);
+        $this->assertDefaultTable('`active` INT64', $sql);
     }
 
     public function testShouldCompileBoolSuccessfully()
@@ -206,7 +186,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('active BOOL', $sql);
+        $this->assertDefaultTable('`active` BOOL', $sql);
     }
 
     public function testShouldCompileDateSuccessfully()
@@ -226,7 +206,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('created_at DATE NOT NULL', $sql);
+        $this->assertDefaultTable('`created_at` DATE NOT NULL', $sql);
     }
 
     public function testShouldCompileDateTimeAndTimestampSuccessfully()
@@ -246,7 +226,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('created_at TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)', $sql);
+        $this->assertDefaultTable('`created_at` TIMESTAMP NOT NULL OPTIONS (allow_commit_timestamp=true)', $sql);
     }
 
     public function testShouldCompileEnumSuccessfully()
@@ -266,7 +246,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('difficulty STRING(255) NOT NULL', $sql);
+        $this->assertDefaultTable('`difficulty` STRING(255) NOT NULL', $sql);
     }
 
     public function testShouldCompileSetSuccessfully()
@@ -286,7 +266,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('flavors ARRAY<STRING(255)> NOT NULL', $sql);
+        $this->assertDefaultTable('`flavors` ARRAY<STRING(255)> NOT NULL', $sql);
     }
 
     public function testShouldCompileTinyTextSuccessfully()
@@ -306,7 +286,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('text STRING(155) NOT NULL', $sql);
+        $this->assertDefaultTable('`text` STRING(155) NOT NULL', $sql);
     }
 
     public function testShouldCompileTextSuccessfully()
@@ -326,7 +306,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('text STRING(65535) NOT NULL', $sql);
+        $this->assertDefaultTable('`text` STRING(65535) NOT NULL', $sql);
     }
 
     public function testShouldCompileMediumAndLongTextSuccessfully()
@@ -346,7 +326,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('text STRING(2621440) NOT NULL', $sql);
+        $this->assertDefaultTable('`text` STRING(2621440) NOT NULL', $sql);
     }
 
     public function testShouldCompileUnavailableSpannerTypeSuccessfully()
@@ -366,7 +346,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('location STRING(1000)', $sql);
+        $this->assertDefaultTable('`location` STRING(1000)', $sql);
     }
 
     public function testShouldCompileYearSuccessfully()
@@ -386,7 +366,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('year STRING(4)', $sql);
+        $this->assertDefaultTable('`year` STRING(4)', $sql);
     }
 
     public function testShouldCompileTimeSuccessfully()
@@ -406,7 +386,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('hour STRING(50)', $sql);
+        $this->assertDefaultTable('`hour` STRING(50)', $sql);
     }
 
     public function testShouldCompileJsonSuccessfully()
@@ -426,7 +406,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('details STRING(2621440)', $sql);
+        $this->assertDefaultTable('`details` STRING(' . CloudSpanner::MAX_STRING_LENGTH . ')', $sql);
     }
 
     public function testShouldCompileBlobTypeSuccessfully()
@@ -446,7 +426,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('photo BYTES(10485760)', $sql);
+        $this->assertDefaultTable('`photo` BYTES(10485760)', $sql);
     }
 
     public function testShouldCompileDefaultMethodWithoutUnsignedWhenTheresUnsignedOnType()
@@ -466,7 +446,7 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('airline NUMERIC', $sql);
+        $this->assertDefaultTable('`airline` NUMERIC', $sql);
     }
 
     public function testShouldThrowAnInvalidArgumentExceptionWhenAssigningInvalidKey()
@@ -521,7 +501,7 @@ class CloudSpannerProcessorTest extends Unit
 
         $this->setupParserMocksWithoutIndexes($field, []);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertEquals('CREATE INDEX TestById_travel ON test(id_travel);', $sql[1]);
+        $this->assertEquals('CREATE INDEX `TestById_travel` ON `test` (id_travel);', $sql[1]);
     }
 
     public function testShouldCompileAForeignKeySuccessfully()
@@ -552,9 +532,9 @@ class CloudSpannerProcessorTest extends Unit
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
             [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            'id INT64 NOT NULL,' . PHP_EOL .
-            'id_travel INT64 NOT NULL,' . PHP_EOL .
-            'CONSTRAINT test_id_travel_foreign FOREIGN KEY (id_travel) REFERENCES travels (id)' . PHP_EOL .
+            '`id` INT64 NOT NULL,' . PHP_EOL .
+            '`id_travel` INT64 NOT NULL,' . PHP_EOL .
+            'CONSTRAINT `test_id_travel_foreign` FOREIGN KEY (id_travel) REFERENCES `travels` (id)' . PHP_EOL .
             ') PRIMARY KEY (id);' ],
             $sql
         );
@@ -589,10 +569,10 @@ class CloudSpannerProcessorTest extends Unit
         $this->assertEquals(
             [
                 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-                'id INT64 NOT NULL,' . PHP_EOL .
-                'email STRING(255) NOT NULL' . PHP_EOL .
+                '`id` INT64 NOT NULL,' . PHP_EOL .
+                '`email` STRING(255) NOT NULL' . PHP_EOL .
                 ') PRIMARY KEY (id);',
-                'CREATE UNIQUE INDEX ' . $this->tableName . '_email_unique ON ' . $this->tableName . ' (email);'
+                'CREATE UNIQUE INDEX `' . $this->tableName . '_email_unique` ON `' . $this->tableName . '` (email);'
             ],
             $sql
         );
@@ -614,8 +594,8 @@ class CloudSpannerProcessorTest extends Unit
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
             'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            'id INT64 NOT NULL,' . PHP_EOL .
-            'email STRING(255) NOT NULL' . PHP_EOL .
+            '`id` INT64 NOT NULL,' . PHP_EOL .
+            '`email` STRING(255) NOT NULL' . PHP_EOL .
             ') PRIMARY KEY (id);',
             $sql[0]
         );
@@ -637,8 +617,8 @@ class CloudSpannerProcessorTest extends Unit
         $firstSql = $this->processor->parseDescribedSchema($this->parserBuilder);
 
         $expectedDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            'id INT64 NOT NULL,' . PHP_EOL .
-            'email STRING(255) NOT NULL' . PHP_EOL .
+            '`id` INT64 NOT NULL,' . PHP_EOL .
+            '`email` STRING(255) NOT NULL' . PHP_EOL .
             ') PRIMARY KEY (id);';
 
         $this->assertEquals($expectedDDL, $firstSql[0]);
@@ -663,7 +643,7 @@ class CloudSpannerProcessorTest extends Unit
     {
         $this->assertEquals(
             [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            'id INT64 NOT NULL,' . PHP_EOL .
+            '`id` INT64 NOT NULL,' . PHP_EOL .
             $column . PHP_EOL .
             ') PRIMARY KEY (id);' ],
             $sql

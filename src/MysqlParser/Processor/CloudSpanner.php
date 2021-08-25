@@ -53,7 +53,7 @@ class CloudSpanner implements Processable, Flushable
      *
      * @var int
      */
-    private $maxStringLength = 2621440;
+    public const MAX_STRING_LENGTH = 2621440;
 
     /**
      * The data types from mysql which spanner does not support currently
@@ -78,6 +78,7 @@ class CloudSpanner implements Processable, Flushable
         'mediumint',
         'smallint',
         'int',
+        'tinyint',
         'intunsigned',
         'tinyintunsigned',
         'bigintunsigned',
@@ -178,16 +179,17 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileVarchar(array $column): string
     {
-        $stringCol = $column['Field'] . ' STRING(';
+        $stringCol = 'STRING(';
         // if it has no details assign default size as 255
         $stringCol .= !empty($column['Details']) ? $column['Details'][1] : '255';
+        $stringCol .= ')';
 
-        return $stringCol . ')' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, $stringCol);
     }
 
     private function compileDecimal(array $column): string
     {
-        return $column['Field'] . ' NUMERIC' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'NUMERIC');
     }
 
     private function compileDouble(array $column): string
@@ -197,15 +199,7 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileFloat(array $column): string
     {
-        return $column['Field'] . ' FLOAT64' . $this->resolveAppends($column);
-    }
-
-    private function compileTinyint(array $column): string
-    {
-        if (!empty($column['Details']) && (int)$column['Details'][1] > 1) {
-            return $this->compileInteger($column);
-        }
-        return $this->compileBoolean($column);
+        return $this->setNewColumn($column, 'FLOAT64');
     }
 
     private function compileBool(array $column): string
@@ -215,17 +209,17 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileBoolean(array $column): string
     {
-        return $column['Field'] . ' BOOL' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'BOOL');
     }
 
     private function compileInteger(array $column): string
     {
-        return $column['Field'] . ' INT64' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'INT64');
     }
 
     private function compileDate(array $column): string
     {
-        return $column['Field'] . ' DATE' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'DATE');
     }
 
     private function compileDatetime(array $column): string
@@ -239,7 +233,7 @@ class CloudSpanner implements Processable, Flushable
         if ($column['Default'] === 'CURRENT_TIMESTAMP') {
             $options = ' OPTIONS (allow_commit_timestamp=true)';
         }
-        return $column['Field'] . ' TIMESTAMP' . $this->resolveAppends($column, $options);
+        return $this->setNewColumn($column, 'TIMESTAMP', $options);
     }
 
     private function compileTime(array $column): string
@@ -262,7 +256,7 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileSet(array $column): string
     {
-        return $column['Field'] . ' ARRAY<STRING(255)>' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'ARRAY<STRING(255)>');
     }
 
     private function compileTinytext(array $column): string
@@ -272,7 +266,7 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileText(array $column): string
     {
-        return $column['Field'] . ' STRING(65535)' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'STRING(65535)');
     }
 
     private function compileMediumtext(array $column): string
@@ -282,23 +276,27 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileLongtext(array $column): string
     {
-        return $column['Field'] . ' STRING(' . $this->maxStringLength . ')' .
-            $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'STRING(' . self::MAX_STRING_LENGTH . ')');
     }
 
     private function compileUnavailableTypes(array $column): string
     {
-        return $column['Field'] . ' STRING(1000)' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'STRING(1000)');
     }
 
     private function compileBlob(array $column): string
     {
-        return $column['Field'] . ' BYTES(10485760)' . $this->resolveAppends($column);
+        return $this->setNewColumn($column, 'BYTES(10485760)');
     }
 
     private function compileJson(array $column): string
     {
         return $this->compileLongtext($column);
+    }
+
+    private function setNewColumn(array $column, string $type, string $options = null): string
+    {
+        return '`' . $column['Field'] . '` ' . $type . $this->resolveAppends($column, $options);
     }
 
     /**
@@ -383,9 +381,9 @@ class CloudSpanner implements Processable, Flushable
         $constraints = ',' . PHP_EOL;
         foreach ($this->foreignKeys as $key => $foreign) {
             $commaAppends = ($key !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
-            $constraints .= 'CONSTRAINT ' . $foreign['CONSTRAINT_NAME'] . ' FOREIGN KEY (' . $foreign['COLUMN_NAME'] .
-                ')' . ' REFERENCES ' . $foreign['REFERENCED_TABLE_NAME'] .  ' (' . $foreign['REFERENCED_COLUMN_NAME'] .
-                ')' . $commaAppends;
+            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (' . $foreign['COLUMN_NAME'] .
+                ')' . ' REFERENCES `' . $foreign['REFERENCED_TABLE_NAME'] .  '` (' .
+                $foreign['REFERENCED_COLUMN_NAME'] . ')' . $commaAppends;
         }
         return $constraints . PHP_EOL . ') ';
     }
@@ -394,8 +392,8 @@ class CloudSpanner implements Processable, Flushable
     {
         $indexes = [];
         foreach ($this->uniqueIndexes as $index) {
-            $indexes[] = 'CREATE UNIQUE INDEX ' . $index['CONSTRAINT_NAME'] . ' ON ' .
-                $index['TABLE_NAME'] . ' (' . $index['COLUMN_NAME'] . ');';
+            $indexes[] = 'CREATE UNIQUE INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
+                $index['TABLE_NAME'] . '` (' . $index['COLUMN_NAME'] . ');';
         }
         return $indexes;
     }
@@ -405,8 +403,8 @@ class CloudSpanner implements Processable, Flushable
         $indexes = [];
         foreach ($this->secondaryIndexes as $index) {
             $indexName = ucfirst($this->tableName) . 'By' . ucfirst($index);
-            $indexes[] = 'CREATE INDEX ' . $indexName . ' ON ' .
-                $this->tableName . '(' . $index . ');';
+            $indexes[] = 'CREATE INDEX `' . $indexName . '` ON `' .
+                $this->tableName . '` (' . $index . ');';
         }
         return $indexes;
     }
