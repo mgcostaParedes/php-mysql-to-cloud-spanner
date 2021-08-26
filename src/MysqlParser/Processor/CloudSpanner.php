@@ -56,6 +56,13 @@ class CloudSpanner implements Processable, Flushable
     public const MAX_STRING_LENGTH = 2621440;
 
     /**
+     * The maximum length for bytes to cloud spanner
+     *
+     * @var int
+     */
+    public const MAX_BYTES_LENGTH = 10485760;
+
+    /**
      * The data types from mysql which spanner does not support currently
      *
      * @var string[]
@@ -286,12 +293,45 @@ class CloudSpanner implements Processable, Flushable
 
     private function compileBlob(array $column): string
     {
-        return $this->setNewColumn($column, 'BYTES(10485760)');
+        $numOfBytes = !empty($column['Details']) ? (int)$column['Details'][1] : 65535;
+        return $this->setBytesColumn($column, $numOfBytes);
+    }
+
+    private function compileTinyblob(array $column): string
+    {
+        $numOfBytes = !empty($column['Details']) ? (int)$column['Details'][1] : 255;
+        return $this->setBytesColumn($column, $numOfBytes);
+    }
+
+    private function compileMediumblob(array $column): string
+    {
+        return $this->compileBinary($column);
+    }
+
+    private function compileLongblob(array $column): string
+    {
+        return $this->compileBinary($column);
+    }
+
+    private function compileVarbinary(array $column): string
+    {
+        return $this->compileBinary($column);
+    }
+
+    private function compileBinary(array $column): string
+    {
+        $numOfBytes = !empty($column['Details']) ? (int)$column['Details'][1] : self::MAX_BYTES_LENGTH;
+        return $this->setBytesColumn($column, $numOfBytes);
     }
 
     private function compileJson(array $column): string
     {
         return $this->compileLongtext($column);
+    }
+
+    private function setBytesColumn(array $column, int $numOfBytes): string
+    {
+        return $this->setNewColumn($column, 'BYTES(' . $numOfBytes . ')');
     }
 
     private function setNewColumn(array $column, string $type, string $options = null): string
