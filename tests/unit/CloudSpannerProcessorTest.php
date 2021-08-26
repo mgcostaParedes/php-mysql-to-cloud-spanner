@@ -426,7 +426,107 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field);
 
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertDefaultTable('`photo` BYTES(10485760)', $sql);
+        $this->assertDefaultTable('`photo` BYTES(65535)', $sql);
+    }
+
+    public function testShouldCompileTinyBlobTypeSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'photo',
+                'Type' => "tinyblob",
+                'Null' => 'YES',
+                'Key' => "",
+                'Default' => null,
+                'Extra' => ''
+            ],
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`photo` BYTES(255)', $sql);
+    }
+
+    public function testShouldCompileMediumBlobTypeSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'photo',
+                'Type' => "mediumblob",
+                'Null' => 'YES',
+                'Key' => "",
+                'Default' => null,
+                'Extra' => ''
+            ],
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`photo` BYTES(' . CloudSpanner::MAX_BYTES_LENGTH . ')', $sql);
+    }
+
+    public function testShouldCompileLongBlobTypeSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'photo',
+                'Type' => "longblob",
+                'Null' => 'YES',
+                'Key' => "",
+                'Default' => null,
+                'Extra' => ''
+            ],
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`photo` BYTES(' . CloudSpanner::MAX_BYTES_LENGTH . ')', $sql);
+    }
+
+    public function testShouldCompileVarBinaryTypeSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'photo',
+                'Type' => "varbinary(155)",
+                'Null' => 'YES',
+                'Key' => "",
+                'Default' => null,
+                'Extra' => ''
+            ],
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`photo` BYTES(155)', $sql);
+    }
+
+    public function testShouldCompileBinaryTypeSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'photo',
+                'Type' => "binary(255)",
+                'Null' => 'YES',
+                'Key' => "",
+                'Default' => null,
+                'Extra' => ''
+            ],
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`photo` BYTES(255)', $sql);
     }
 
     public function testShouldCompileDefaultMethodWithoutUnsignedWhenTheresUnsignedOnType()
