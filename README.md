@@ -109,8 +109,8 @@ The library outputs a multidimensional array with following
 keys '**tables**', '**indexes**', '**constraints**'
 to insert on the Google Cloud Spanner engine.
 
-**Note**: You may want to store the constraints keys to run
-at end of all tables and indexes to prevent running a
+**Note**: You may want to store the constraint keys to run
+at the end of all tables and indexes to prevent running a
 constraint for a table which is not created.
 
 ### Using the Dialect Service for MySQL
