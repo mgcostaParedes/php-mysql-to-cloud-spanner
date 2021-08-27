@@ -454,7 +454,7 @@ class CloudSpanner implements Processable, Flushable
                 continue;
             }
             // check multiple column unique indexes
-            $multipleColumnKey = array_filter($this->keys, function ($key) use($index) {
+            $multipleColumnKey = array_filter($this->keys, function ($key) use ($index) {
                 return ($key['CONSTRAINT_NAME'] === $index['CONSTRAINT_NAME']);
             });
 
