@@ -42,6 +42,13 @@ class CloudSpanner implements Processable, Flushable
     protected $uniqueIndexes = [];
 
     /**
+     * The assigned names for unique keys
+     *
+     * @var array
+     */
+    private $assignedUniqueKeys = [];
+
+    /**
      * The array which will store the secondary indexes to the spanner ddl
      *
      * @var array
@@ -101,6 +108,13 @@ class CloudSpanner implements Processable, Flushable
     private $columns;
 
     /**
+     * The described keys from MySQL
+     *
+     * @var string[]
+     */
+    private $keys;
+
+    /**
      * The name of table to create
      *
      * @var string
@@ -117,7 +131,8 @@ class CloudSpanner implements Processable, Flushable
     {
         $this->tableName = $builder->getTableName();
         $this->columns = $builder->getDescribedTable();
-        $this->assignKeys($builder);
+        $this->keys = $builder->getDescribedKeys();
+        $this->assignKeys();
 
         $tableDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL;
 
@@ -177,6 +192,7 @@ class CloudSpanner implements Processable, Flushable
         $this->secondaryIndexes = [];
         $this->foreignKeys = [];
         $this->uniqueIndexes = [];
+        $this->assignedUniqueKeys = [];
     }
 
     private function compileChar(array $column): string
@@ -365,11 +381,11 @@ class CloudSpanner implements Processable, Flushable
         return $str . ',' . PHP_EOL;
     }
 
-    protected function assignKeys(ParserBuildable $builder): void
+    protected function assignKeys(): void
     {
         foreach ($this->columns as $column) {
             if (!empty($column['Key'])) {
-                $this->assignColumnKey($builder, $column['Field'], $column['Key']);
+                $this->assignColumnKey($column['Field'], $column['Key']);
             }
         }
 
@@ -380,14 +396,13 @@ class CloudSpanner implements Processable, Flushable
         }
     }
 
-    protected function assignColumnKey(ParserBuildable $builder, string $field, string $type): void
+    protected function assignColumnKey(string $field, string $type): void
     {
         if (!in_array($type, $this->availableMysqlKeys, true)) {
             throw new InvalidArgumentException('Column key type must be "PRI", "MUL" or "UNI"');
         }
 
-        $keys = $builder->getDescribedKeys();
-        $fieldArrayIndex = array_search($field, array_column($keys, 'COLUMN_NAME'));
+        $fieldArrayIndex = array_search($field, array_column($this->keys, 'COLUMN_NAME'));
 
         if ($fieldArrayIndex === false && $type !== 'PRI' && $type !== 'MUL') {
             throw new InvalidArgumentException('Details for the key ' . $field . ' not found, provide it on "setKeys"');
@@ -400,10 +415,10 @@ class CloudSpanner implements Processable, Flushable
 
         $keyDetails = [];
         if ($fieldArrayIndex !== false) {
-            $keyDetails = $keys[$fieldArrayIndex];
+            $keyDetails = $this->keys[$fieldArrayIndex];
         }
 
-        if ($type === 'MUL' && !empty($keyDetails)) {
+        if ($type === 'MUL' && !empty($keyDetails) && !is_null($keyDetails['REFERENCED_TABLE_NAME'])) {
             $this->foreignKeys[] = $keyDetails;
         }
 
@@ -411,7 +426,10 @@ class CloudSpanner implements Processable, Flushable
             $this->secondaryIndexes[] = $field;
         }
 
-        if ($type === 'UNI') {
+        if (
+            ($type === 'UNI') ||
+            ($type === 'MUL' && !empty($keyDetails) && is_null($keyDetails['REFERENCED_TABLE_NAME']))
+        ) {
             $this->uniqueIndexes[] = $keyDetails;
         }
     }
@@ -432,6 +450,25 @@ class CloudSpanner implements Processable, Flushable
     {
         $indexes = [];
         foreach ($this->uniqueIndexes as $index) {
+            if (in_array($index['CONSTRAINT_NAME'], $this->assignedUniqueKeys)) {
+                continue;
+            }
+            // check multiple column unique indexes
+            $multipleColumnKey = array_filter($this->keys, function ($key) use($index) {
+                return ($key['CONSTRAINT_NAME'] === $index['CONSTRAINT_NAME']);
+            });
+
+            if (!empty($multipleColumnKey)) {
+                $columnNames = [];
+                foreach ($multipleColumnKey as $key) {
+                    $columnNames[] = $key['COLUMN_NAME'];
+                }
+                $index['COLUMN_NAME'] = implode(', ', $columnNames);
+            }
+
+            // to prevent duplicated unique keys
+            $this->assignedUniqueKeys[] = $index['CONSTRAINT_NAME'];
+
             $indexes[] = 'CREATE UNIQUE INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
                 $index['TABLE_NAME'] . '` (' . $index['COLUMN_NAME'] . ');';
         }
