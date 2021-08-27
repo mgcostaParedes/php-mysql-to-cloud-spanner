@@ -601,7 +601,7 @@ class CloudSpannerProcessorTest extends Unit
 
         $this->setupParserMocksWithoutIndexes($field, []);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertEquals('CREATE INDEX `TestById_travel` ON `test` (`id_travel`);', $sql[1]);
+        $this->assertEquals(['CREATE INDEX `TestById_travel` ON `test` (`id_travel`);'], $sql['indexes']);
     }
 
     public function testShouldCompileAForeignKeySuccessfully()
@@ -631,11 +631,19 @@ class CloudSpannerProcessorTest extends Unit
         $this->setupParserMocksWithoutIndexes($field, $key);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
-            [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            '`id` INT64 NOT NULL,' . PHP_EOL .
-            '`id_travel` INT64 NOT NULL,' . PHP_EOL .
-            'CONSTRAINT `test_id_travel_foreign` FOREIGN KEY (`id_travel`) REFERENCES `travels` (`id`)' . PHP_EOL .
-            ') PRIMARY KEY (id);' ],
+            [
+                'tables' => [
+                    'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                    '`id` INT64 NOT NULL,' . PHP_EOL .
+                    '`id_travel` INT64 NOT NULL' . PHP_EOL .
+                    ') PRIMARY KEY (id);'
+                ],
+                'constraints' => [
+                    'ALTER TABLE `' . $this->tableName .
+                    '` ADD CONSTRAINT `test_id_travel_foreign` FOREIGN KEY (`id_travel`) REFERENCES `travels` (`id`);'
+                ],
+                'indexes' => []
+            ],
             $sql
         );
     }
@@ -668,11 +676,16 @@ class CloudSpannerProcessorTest extends Unit
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
             [
-                'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-                '`id` INT64 NOT NULL,' . PHP_EOL .
-                '`email` STRING(255) NOT NULL' . PHP_EOL .
-                ') PRIMARY KEY (id);',
-                'CREATE UNIQUE INDEX `' . $this->tableName . '_email_unique` ON `' . $this->tableName . '` (`email`);'
+                'tables' => [
+                    'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                    '`id` INT64 NOT NULL,' . PHP_EOL .
+                    '`email` STRING(255) NOT NULL' . PHP_EOL .
+                    ') PRIMARY KEY (id);',
+                ],
+                'indexes' => [
+                    'CREATE UNIQUE INDEX `' . $this->tableName . '_email_unique` ON `' . $this->tableName . '` (`email`);'
+                ],
+                'constraints' => []
             ],
             $sql
         );
@@ -721,12 +734,17 @@ class CloudSpannerProcessorTest extends Unit
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals(
             [
-                'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-                '`id` INT64 NOT NULL,' . PHP_EOL .
-                '`email` STRING(255) NOT NULL,' . PHP_EOL .
-                '`fax` STRING(255) NOT NULL' . PHP_EOL .
-                ') PRIMARY KEY (id);',
-                'CREATE UNIQUE INDEX `' . $this->tableName . '_email_fax_unique` ON `' . $this->tableName . '` (`email`, `fax`);'
+                'tables' => [
+                    'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                    '`id` INT64 NOT NULL,' . PHP_EOL .
+                    '`email` STRING(255) NOT NULL,' . PHP_EOL .
+                    '`fax` STRING(255) NOT NULL' . PHP_EOL .
+                    ') PRIMARY KEY (id);'
+                ],
+                'indexes' =>  [
+                    'CREATE UNIQUE INDEX `' . $this->tableName . '_email_fax_unique` ON `' . $this->tableName . '` (`email`, `fax`);'
+                ],
+                'constraints' => []
             ],
             $sql
         );
@@ -746,12 +764,12 @@ class CloudSpannerProcessorTest extends Unit
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertEquals(
+        $this->assertEquals([
             'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
             '`id` INT64 NOT NULL,' . PHP_EOL .
             '`email` STRING(255) NOT NULL' . PHP_EOL .
-            ') PRIMARY KEY (id);',
-            $sql[0]
+            ') PRIMARY KEY (id);'],
+            $sql['tables']
         );
     }
 
@@ -775,10 +793,10 @@ class CloudSpannerProcessorTest extends Unit
             '`email` STRING(255) NOT NULL' . PHP_EOL .
             ') PRIMARY KEY (id);';
 
-        $this->assertEquals($expectedDDL, $firstSql[0]);
+        $this->assertEquals([$expectedDDL], $firstSql['tables']);
 
         $secondSql = $this->processor->parseDescribedSchema($this->parserBuilder);
-        $this->assertEquals($expectedDDL, $secondSql[0]);
+        $this->assertEquals([$expectedDDL], $secondSql['tables']);
     }
 
     private function setupParserMocksWithoutIndexes(array $table, array $keys = [])
@@ -796,10 +814,15 @@ class CloudSpannerProcessorTest extends Unit
     private function assertDefaultTable(string $column, array $sql)
     {
         $this->assertEquals(
-            [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
-            '`id` INT64 NOT NULL,' . PHP_EOL .
-            $column . PHP_EOL .
-            ') PRIMARY KEY (id);' ],
+            [
+                'tables' => [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                        '`id` INT64 NOT NULL,' . PHP_EOL .
+                        $column . PHP_EOL .
+                        ') PRIMARY KEY (id);'
+                ],
+                'indexes' => [],
+                'constraints' => []
+            ],
             $sql
         );
     }

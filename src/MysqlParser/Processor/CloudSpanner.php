@@ -165,23 +165,19 @@ class CloudSpanner implements Processable, Flushable
             $tableDDL .= $this->$method($column);
         }
 
-        $tableDDL .= !empty($this->foreignKeys) ? $this->compileForeignKeys() : PHP_EOL . ') ';
-        $tableDDL .= 'PRIMARY KEY (' . implode(",", $this->primaryKeys) . ");";
+        $tableDDL .= PHP_EOL . ') PRIMARY KEY (' . implode(",", $this->primaryKeys) . ");";
 
-        $output = [ $tableDDL ];
-
-        if (!empty($this->uniqueIndexes)) {
-            $output = array_merge($output, $this->compileUniqueIndexes());
-        }
-
-        if (!empty($this->secondaryIndexes)) {
-            $output = array_merge($output, $this->compileSecondaryIndexes());
-        }
+        $indexes = array_merge($this->compileUniqueIndexes(), $this->compileSecondaryIndexes());
+        $constraints = $this->compileForeignKeys();
 
         // reset the table details on object before returns the ddl
         $this->flush();
 
-        return $output;
+        return [
+            'tables' => [ $tableDDL ],
+            'indexes' => $indexes,
+            'constraints' => $constraints
+        ];
     }
 
     public function flush(): void
@@ -434,17 +430,17 @@ class CloudSpanner implements Processable, Flushable
         }
     }
 
-    private function compileForeignKeys(): string
+    private function compileForeignKeys(): array
     {
-        $constraints = ',' . PHP_EOL;
-        foreach ($this->foreignKeys as $key => $foreign) {
-            $commaAppends = ($key !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
-            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' .
+        $constraints = [];
+        foreach ($this->foreignKeys as $foreign) {
+            $constraints[] = 'ALTER TABLE `' . $this->tableName . '` ADD CONSTRAINT `' .
+                $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' .
                 $foreign['COLUMN_NAME'] . '`)' . ' REFERENCES `' .
                 $foreign['REFERENCED_TABLE_NAME'] .  '` (`' .
-                $foreign['REFERENCED_COLUMN_NAME'] . '`)' . $commaAppends;
+                $foreign['REFERENCED_COLUMN_NAME'] . '`);';
         }
-        return $constraints . PHP_EOL . ') ';
+        return $constraints;
     }
 
     private function compileUniqueIndexes(): array
