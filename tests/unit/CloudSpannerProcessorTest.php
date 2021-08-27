@@ -640,7 +640,7 @@ class CloudSpannerProcessorTest extends Unit
         );
     }
 
-    public function testShouldCompileAnUniqueIndexSuccessfully()
+    public function testShouldCompileASingleUniqueIndexSuccessfully()
     {
         $field = [
             $this->defaultPrimaryKey,
@@ -673,6 +673,60 @@ class CloudSpannerProcessorTest extends Unit
                 '`email` STRING(255) NOT NULL' . PHP_EOL .
                 ') PRIMARY KEY (id);',
                 'CREATE UNIQUE INDEX `' . $this->tableName . '_email_unique` ON `' . $this->tableName . '` (email);'
+            ],
+            $sql
+        );
+    }
+
+    public function testShouldCompileAMultipleUniqueIndexSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => 'MUL',
+                'Default' => null,
+                'Extra' => ''
+            ],
+            [
+                'Field' => 'fax',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => 'MUL',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $key = [
+            [
+                'TABLE_NAME' => $this->tableName,
+                'COLUMN_NAME' => 'email',
+                'CONSTRAINT_NAME' => $this->tableName . '_email_fax_unique',
+                'REFERENCED_TABLE_NAME' => null,
+                'REFERENCED_COLUMN_NAME' => null
+            ],
+            [
+                'TABLE_NAME' => $this->tableName,
+                'COLUMN_NAME' => 'fax',
+                'CONSTRAINT_NAME' => $this->tableName . '_email_fax_unique',
+                'REFERENCED_TABLE_NAME' => null,
+                'REFERENCED_COLUMN_NAME' => null
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field, $key);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals(
+            [
+                'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                '`id` INT64 NOT NULL,' . PHP_EOL .
+                '`email` STRING(255) NOT NULL,' . PHP_EOL .
+                '`fax` STRING(255) NOT NULL' . PHP_EOL .
+                ') PRIMARY KEY (id);',
+                'CREATE UNIQUE INDEX `' . $this->tableName . '_email_fax_unique` ON `' . $this->tableName . '` (email, fax);'
             ],
             $sql
         );
