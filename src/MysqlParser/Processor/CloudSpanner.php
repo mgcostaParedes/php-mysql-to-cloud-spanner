@@ -439,9 +439,10 @@ class CloudSpanner implements Processable, Flushable
         $constraints = ',' . PHP_EOL;
         foreach ($this->foreignKeys as $key => $foreign) {
             $commaAppends = ($key !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
-            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (' . $foreign['COLUMN_NAME'] .
-                ')' . ' REFERENCES `' . $foreign['REFERENCED_TABLE_NAME'] .  '` (' .
-                $foreign['REFERENCED_COLUMN_NAME'] . ')' . $commaAppends;
+            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' .
+                $foreign['COLUMN_NAME'] . '`)' . ' REFERENCES `' .
+                $foreign['REFERENCED_TABLE_NAME'] .  '` (`' .
+                $foreign['REFERENCED_COLUMN_NAME'] . '`)' . $commaAppends;
         }
         return $constraints . PHP_EOL . ') ';
     }
@@ -463,14 +464,14 @@ class CloudSpanner implements Processable, Flushable
                 foreach ($multipleColumnKey as $key) {
                     $columnNames[] = $key['COLUMN_NAME'];
                 }
-                $index['COLUMN_NAME'] = implode(', ', $columnNames);
+                $index['COLUMN_NAME'] = implode('`, `', $columnNames);
             }
 
             // to prevent duplicated unique keys
             $this->assignedUniqueKeys[] = $index['CONSTRAINT_NAME'];
 
             $indexes[] = 'CREATE UNIQUE INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
-                $index['TABLE_NAME'] . '` (' . $index['COLUMN_NAME'] . ');';
+                $index['TABLE_NAME'] . '` (`' . $index['COLUMN_NAME'] . '`);';
         }
         return $indexes;
     }
@@ -481,7 +482,7 @@ class CloudSpanner implements Processable, Flushable
         foreach ($this->secondaryIndexes as $index) {
             $indexName = ucfirst($this->tableName) . 'By' . ucfirst($index);
             $indexes[] = 'CREATE INDEX `' . $indexName . '` ON `' .
-                $this->tableName . '` (' . $index . ');';
+                $this->tableName . '` (`' . $index . '`);';
         }
         return $indexes;
     }
