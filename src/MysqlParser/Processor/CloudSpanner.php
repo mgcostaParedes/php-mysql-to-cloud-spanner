@@ -439,8 +439,9 @@ class CloudSpanner implements Processable, Flushable
         $constraints = ',' . PHP_EOL;
         foreach ($this->foreignKeys as $key => $foreign) {
             $commaAppends = ($key !== count($this->foreignKeys) - 1) ? ',' . PHP_EOL : '';
-            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' . $foreign['COLUMN_NAME'] .
-                '`)' . ' REFERENCES `' . $foreign['REFERENCED_TABLE_NAME'] .  '` (`' .
+            $constraints .= 'CONSTRAINT `' . $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' .
+                $foreign['COLUMN_NAME'] . '`)' . ' REFERENCES `' .
+                $foreign['REFERENCED_TABLE_NAME'] .  '` (`' .
                 $foreign['REFERENCED_COLUMN_NAME'] . '`)' . $commaAppends;
         }
         return $constraints . PHP_EOL . ') ';
