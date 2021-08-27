@@ -90,18 +90,28 @@ $ddl = $schemaParser->setTableName($tableName)
 // it will output an array of DDL statements required to create
 // the necessary elements to compose the table
 // -------------------------------------------
-// array(2) {
-//  [0]=> string(145) "CREATE TABLE users (
-//      id INT64 NOT NULL,
-//      name STRING(255) NOT NULL,
-//      email STRING(255) NOT NULL,
-//      password STRING(255) NOT NULL
-//  ) PRIMARY KEY (id)"
-//  [1]=> string(55) "CREATE UNIQUE INDEX users_email_unique ON users (email)"
+// array(3) {
+//  ['tables'] => array {
+//      [0] => string(145) "CREATE TABLE users (
+//          id INT64 NOT NULL,
+//          name STRING(255) NOT NULL,
+//          email STRING(255) NOT NULL,
+//          password STRING(255) NOT NULL
+//      ) PRIMARY KEY (id)"
+//  }
+//  ['indexes'] => array {
+//      [0] => string(55) "CREATE UNIQUE INDEX users_email_unique ON users (email)"
+//  }
+//  ['constraints'] => array {}
 ```
 
-The library outputs an array of valid and required statements
+The library outputs a multidimensional array with following
+keys '**tables**', '**indexes**', '**constraints**'
 to insert on the Google Cloud Spanner engine.
+
+**Note**: You may want to store the constraints keys to run
+at end of all tables and indexes to prevent running a
+constraint for a table which is not created.
 
 ### Using the Dialect Service for MySQL
 
