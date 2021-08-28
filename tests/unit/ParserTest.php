@@ -158,16 +158,20 @@ class ParserTest extends Unit
             ]
         ];
 
-        $expectedDDL = 'CREATE TABLE flights (' . PHP_EOL .
-        'id INT64 NOT NULL,' . PHP_EOL .
-        'airline STRING(255)' . PHP_EOL .
-        ') PRIMARY KEY (id)';
+        $expectedResponse = [
+            'tables' => ['CREATE TABLE `flights` (' . PHP_EOL .
+                '`id` INT64 NOT NULL,' . PHP_EOL .
+                '`airline` STRING(255)' . PHP_EOL .
+                ') PRIMARY KEY (id)'],
+            'indexes' => [],
+            'constraints' => []
+        ];
 
         $this->spannerProcessor->shouldReceive('parseDescribedSchema')
-                            ->andReturn([$expectedDDL])->once();
+                            ->andReturn($expectedResponse)->once();
 
         $ddl = $this->parser->setTableName($this->tableName)->setDescribedTable($fields)->setKeys($keys)->toDDL();
-        $this->assertEquals([ $expectedDDL ], $ddl);
+        $this->assertEquals($expectedResponse, $ddl);
     }
 
     public function testShouldThrowAParserExceptionWhenCallingParseWithoutSettingRequiredProperties()
