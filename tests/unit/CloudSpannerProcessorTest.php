@@ -3,6 +3,7 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
+use MgCosta\MysqlParser\Exceptions\PrimaryKeyNotFoundException;
 use MgCosta\MysqlParser\Parser;
 use MgCosta\MysqlParser\Processor\CloudSpanner;
 use Mockery as m;
@@ -763,6 +764,8 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
+        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(true)->once();
+        $this->parserBuilder->shouldReceive('getDefaultID')->andReturn('id')->once();
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals([
             'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
@@ -786,6 +789,8 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
+        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(true)->once();
+        $this->parserBuilder->shouldReceive('getDefaultID')->andReturn('id')->once();
         $firstSql = $this->processor->parseDescribedSchema($this->parserBuilder);
 
         $expectedDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
@@ -797,6 +802,26 @@ class CloudSpannerProcessorTest extends Unit
 
         $secondSql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals([$expectedDDL], $secondSql['tables']);
+    }
+
+    public function testShouldThrowAPKNotFoundExceptionWhenSchemaIsMissingPKAndAssigningPKIsDisable()
+    {
+        $this->expectException(PrimaryKeyNotFoundException::class);
+
+        $field = [
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+        $this->setupParserMocksWithoutIndexes($field, []);
+        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(false)->once();
+
+        $this->processor->parseDescribedSchema($this->parserBuilder);
     }
 
     private function setupParserMocksWithoutIndexes(array $table, array $keys = [])

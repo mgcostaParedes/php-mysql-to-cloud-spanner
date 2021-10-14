@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MgCosta\MysqlParser;
 
+use MgCosta\MysqlParser\Contracts\PkOperator;
 use MgCosta\MysqlParser\Exceptions\ParserException;
 use MgCosta\MysqlParser\Contracts\ParserBuildable;
 use MgCosta\MysqlParser\Contracts\MysqlParsable;
@@ -11,7 +12,7 @@ use MgCosta\MysqlParser\Contracts\Processable;
 use MgCosta\MysqlParser\Processor\CloudSpanner;
 use RuntimeException;
 
-class Parser implements MysqlParsable, ParserBuildable
+class Parser implements MysqlParsable, ParserBuildable, PkOperator
 {
     /**
      * The name of the table to parse
@@ -48,6 +49,20 @@ class Parser implements MysqlParsable, ParserBuildable
      */
     protected $processor;
 
+    /**
+     * The variable which will be used to define the required primary key if a PK is missing
+     *
+     * @var string
+     */
+    protected $defaultID = Dialect::DEFAULT_PRIMARY_KEY;
+
+    /**
+     * The bool which will be used to trigger if assign of PK when there's no PK
+     *
+     * @var bool
+     */
+    protected $shouldAssignPK = true;
+
     public function __construct(Processable $processor = null)
     {
         $this->processor = $processor ?? new CloudSpanner();
@@ -62,6 +77,28 @@ class Parser implements MysqlParsable, ParserBuildable
     public function getTableName(): string
     {
         return $this->tableName;
+    }
+
+    public function setDefaultID(string $columnName): Parser
+    {
+        $this->defaultID = $columnName;
+        return $this;
+    }
+
+    public function getDefaultID(): string
+    {
+        return $this->defaultID;
+    }
+
+    public function setShouldAssignPK(bool $state): Parser
+    {
+        $this->shouldAssignPK = $state;
+        return $this;
+    }
+
+    public function shouldAssignPK(): bool
+    {
+        return $this->shouldAssignPK;
     }
 
     public function setDescribedTable(array $table): Parser
