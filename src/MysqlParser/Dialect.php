@@ -30,9 +30,10 @@ class Dialect implements DialectGenerator
         return 'DESCRIBE ' . $tableName;
     }
 
-    public function generateTableKeysDetails(string $tableName): string
+    public function generateTableKeysDetails(string $databaseName, string $tableName): string
     {
         return "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
-                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $tableName . "'";
+                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $tableName .
+                        "' AND CONSTRAINT_SCHEMA = '" . $databaseName . "'";
     }
 }

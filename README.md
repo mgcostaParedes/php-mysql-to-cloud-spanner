@@ -160,7 +160,7 @@ $ddl = $schemaParser->setDefaultID('column_id')
 // it can lead on an exception
 
 try {
-    $schemaParser = (new Parser())->setShouldAssignPK(false);
+    $schemaParser = (new Parser())->shouldAssignPrimaryKey(false);
     
     $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
@@ -193,6 +193,7 @@ use MgCosta\MysqlParser\Dialect;
 $schemaParser = new Parser();
 $mysqlDialect = new Dialect();
 
+$databaseName = 'my_database';
 $tableName = 'users';
 
 // you can extract the table details doing the following
@@ -200,7 +201,7 @@ $table = DB::select(
     DB::raw($mysqlDialect->generateTableDetails($tableName))
 );
 $keys = DB::select(
-    DB::raw($mysqlDialect->generateTableKeysDetails($tableName))
+    DB::raw($mysqlDialect->generateTableKeysDetails($databaseName, $tableName))
 );
 
 $ddl = $schemaParser->setTableName($tableName)
