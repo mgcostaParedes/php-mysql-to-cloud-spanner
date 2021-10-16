@@ -17,7 +17,7 @@ class Dialect implements DialectGenerator
      * The default described column for a PK when there's no PK on a MySQL Table
      */
     public const DEFAULT_PRIMARY_KEY_PROPS = [
-        'Field' => 'id',
+        'Field' => self::DEFAULT_PRIMARY_KEY,
         'Type' => 'biginteger unsigned',
         'Null' => 'NO',
         'Key' => "PRI",

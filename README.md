@@ -113,6 +113,67 @@ to insert on the Google Cloud Spanner engine.
 at the end of all tables and indexes to prevent running a
 constraint for a table which is not created.
 
+### Dealing with schemas without Primary Keys
+
+Since the primary key on cloud spanner is like almost [required](https://cloud.google.com/spanner/docs/schema-and-data-model#choosing_a_primary_key),
+by default if there's a table schema without **PK** it will generate
+a default column called by **id** which will be an **int64** type. However
+you can modify the way this default column is created or disable it at all,
+for that check the following example:
+
+```PHP
+use MgCosta\MysqlParser\Parser;
+use MgCosta\MysqlParser\Dialect;
+use MgCosta\MysqlParser\Exceptions\PrimaryKeyNotFoundException;
+
+$schemaParser = new Parser();
+
+$tableName = 'users';
+
+$table = [
+    [
+        'Field' => 'name',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ],
+    [
+        'Field' => 'email',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ]
+];
+
+// define the default column id for a specific table
+$ddl = $schemaParser->setDefaultID('column_id')
+                  ->setTableName($tableName)
+                  ->setDescribedTable($table)
+                  ->setKeys($keys)
+                  ->toDDL();
+
+// disable the generation of default id
+// it can lead on an exception
+
+try {
+    $schemaParser = (new Parser())->setShouldAssignPK(false);
+    
+    $ddl = $schemaParser->setTableName($tableName)
+                    ->setDescribedTable($table)
+                    ->setKeys($keys)
+                    ->toDDL();
+
+} catch(PrimaryKeyNotFoundException $e) {
+
+}
+
+```
+
+
 ### Using the Dialect Service for MySQL
 
 To help your life to fetch the data we need from MySQL to

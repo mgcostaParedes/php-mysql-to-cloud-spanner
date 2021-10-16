@@ -50,6 +50,18 @@ class ParserTest extends Unit
         $this->parser->setDescribedTable($fields);
     }
 
+    public function testShouldGetTheDefaultIdWhenAssigningADefaultID()
+    {
+        $this->parser->setDefaultID('test');
+        $this->assertEquals('test', $this->parser->getDefaultID());
+    }
+    public function testShouldGetAssignPKBoolWhenSetShouldAssignPK()
+    {
+        $this->parser->setShouldAssignPK(false);
+        $this->assertEquals(false, $this->parser->shouldAssignPK());
+    }
+
+
     public function testShouldThrowARuntimeExceptionWhenSettingKeysWithInvalidNames()
     {
         $this->expectException(RuntimeException::class);

@@ -7,8 +7,10 @@ namespace MgCosta\MysqlParser\Processor;
 use InvalidArgumentException;
 use MgCosta\MysqlParser\Contracts\Flushable;
 use MgCosta\MysqlParser\Contracts\ParserBuildable;
+use MgCosta\MysqlParser\Contracts\PkOperator;
 use MgCosta\MysqlParser\Contracts\Processable;
 use MgCosta\MysqlParser\Dialect;
+use MgCosta\MysqlParser\Exceptions\PrimaryKeyNotFoundException;
 use MgCosta\MysqlParser\Parser;
 
 class CloudSpanner implements Processable, Flushable
@@ -124,15 +126,16 @@ class CloudSpanner implements Processable, Flushable
     /**
      * Method to parse the describable table from PHP PDO Mysql to raw cloud spanner ddl
      *
-     * @param Parser $builder
+     * @param ParserBuildable $builder
      * @return array
+     * @throws PrimaryKeyNotFoundException
      */
     public function parseDescribedSchema(ParserBuildable $builder): array
     {
         $this->tableName = $builder->getTableName();
         $this->columns = $builder->getDescribedTable();
         $this->keys = $builder->getDescribedKeys();
-        $this->assignKeys();
+        $this->assignKeys($builder);
 
         $tableDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL;
 
@@ -377,7 +380,11 @@ class CloudSpanner implements Processable, Flushable
         return $str . ',' . PHP_EOL;
     }
 
-    protected function assignKeys(): void
+    /**
+     * @param PkOperator $operator
+     * @throws PrimaryKeyNotFoundException
+     */
+    protected function assignKeys(PkOperator $operator): void
     {
         foreach ($this->columns as $column) {
             if (!empty($column['Key'])) {
@@ -387,8 +394,13 @@ class CloudSpanner implements Processable, Flushable
 
         // if no primary key founded on table, we should assign a default id column
         if (empty($this->primaryKeys)) {
-            $this->primaryKeys[] = Dialect::DEFAULT_PRIMARY_KEY;
-            array_unshift($this->columns, Dialect::DEFAULT_PRIMARY_KEY_PROPS);
+            if (!$operator->shouldAssignPK()) {
+                throw new PrimaryKeyNotFoundException(PrimaryKeyNotFoundException::MESSAGE);
+            }
+            $this->primaryKeys[] = $operator->getDefaultID();
+            $column = Dialect::DEFAULT_PRIMARY_KEY_PROPS;
+            $column['Field'] = $operator->getDefaultID();
+            array_unshift($this->columns, $column);
         }
     }
 
