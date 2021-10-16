@@ -160,7 +160,7 @@ $ddl = $schemaParser->setDefaultID('column_id')
 // it can lead on an exception
 
 try {
-    $schemaParser = (new Parser())->setShouldAssignPK(false);
+    $schemaParser = (new Parser())->shouldAssignPrimaryKey(false);
     
     $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
