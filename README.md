@@ -82,10 +82,14 @@ $keys = [
     ]
 ];
 
+// we can pass an argument to define if we want semicolons
+// at the end of each statement, default is true
+$withSemicolons = true;
+
 $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
-                    ->toDDL();
+                    ->toDDL($withSemicolons);
                     
 // it will output an array of DDL statements required to create
 // the necessary elements to compose the table

@@ -179,6 +179,7 @@ class ParserTest extends Unit
             'constraints' => []
         ];
 
+        $this->spannerProcessor->shouldReceive('setAssignableSemicolon')->once()->andReturnSelf();
         $this->spannerProcessor->shouldReceive('parseDescribedSchema')
                             ->andReturn($expectedResponse)->once();
 

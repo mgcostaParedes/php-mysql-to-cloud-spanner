@@ -530,6 +530,26 @@ class CloudSpannerProcessorTest extends Unit
         $this->assertDefaultTable('`photo` BYTES(255)', $sql);
     }
 
+    public function testShouldCompileWithoutSemicolonSuccessfully()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'airline',
+                'Type' => 'varchar(255)',
+                'Null' => 'YES',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field);
+
+        $sql = $this->processor->setAssignableSemicolon(false)->parseDescribedSchema($this->parserBuilder);
+        $this->assertDefaultTable('`airline` STRING(255)', $sql, false);
+    }
+
     public function testShouldCompileDefaultMethodWithoutUnsignedWhenTheresUnsignedOnType()
     {
         $field = [
@@ -859,8 +879,6 @@ class CloudSpannerProcessorTest extends Unit
 
     private function setupParserMocksWithoutIndexes(array $table, array $keys = [])
     {
-        $this->parserBuilder->shouldReceive('setDescribedTable')
-            ->andReturnSelf()->once();
         $this->parserBuilder->shouldReceive('getTableName')
             ->andReturn($this->tableName)->once();
         $this->parserBuilder->shouldReceive('getDescribedTable')
@@ -869,14 +887,15 @@ class CloudSpannerProcessorTest extends Unit
             ->andReturn($keys)->once();
     }
 
-    private function assertDefaultTable(string $column, array $sql)
+    private function assertDefaultTable(string $column, array $sql, bool $semicolon = true)
     {
+        $appendSemicolon = $semicolon ? ';' : '';
         $this->assertEquals(
             [
                 'tables' => [ 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
                         '`id` INT64 NOT NULL,' . PHP_EOL .
                         $column . PHP_EOL .
-                        ') PRIMARY KEY (id);'
+                        ') PRIMARY KEY (id)' . $appendSemicolon
                 ],
                 'indexes' => [],
                 'constraints' => []

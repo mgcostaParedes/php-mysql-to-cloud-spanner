@@ -4,5 +4,5 @@ namespace MgCosta\MysqlParser\Contracts;
 
 interface MysqlParsable
 {
-    public function toDDL(): array;
+    public function toDDL(bool $withSemicolons = true): array;
 }
