@@ -133,13 +133,15 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
     }
 
     /**
+     * @param bool $withSemicolons
      * @return array
+     * @throws Exceptions\PrimaryKeyNotFoundException
      * @throws ParserException
      */
-    public function toDDL(): array
+    public function toDDL(bool $withSemicolons = true): array
     {
         if (!empty($this->describedTable)) {
-            return $this->processor->parseDescribedSchema($this);
+            return $this->processor->setAssignableSemicolon($withSemicolons)->parseDescribedSchema($this);
         }
 
         throw new ParserException("You must define a described table to parse");

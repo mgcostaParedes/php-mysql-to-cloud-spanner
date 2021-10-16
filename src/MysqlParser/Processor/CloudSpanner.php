@@ -124,6 +124,23 @@ class CloudSpanner implements Processable, Flushable
     private $tableName;
 
     /**
+     * If it should assign semicolon at end of each statement
+     *
+     * @var bool
+     */
+    private $assignSemicolon = true;
+
+    /**
+     * @param bool $state
+     * @return $this
+     */
+    public function setAssignableSemicolon(bool $state): self
+    {
+        $this->assignSemicolon = $state;
+        return $this;
+    }
+
+    /**
      * Method to parse the describable table from PHP PDO Mysql to raw cloud spanner ddl
      *
      * @param ParserBuildable $builder
@@ -168,7 +185,7 @@ class CloudSpanner implements Processable, Flushable
             $tableDDL .= $this->$method($column);
         }
 
-        $tableDDL .= PHP_EOL . ') PRIMARY KEY (' . implode(",", $this->primaryKeys) . ");";
+        $tableDDL .= PHP_EOL . ') PRIMARY KEY (' . implode(",", $this->primaryKeys) . ")" . $this->setEndOfStatement();
 
         $indexes = array_merge($this->compileUniqueIndexes(), $this->compileSecondaryIndexes());
         $constraints = $this->compileForeignKeys();
@@ -354,6 +371,11 @@ class CloudSpanner implements Processable, Flushable
         return '`' . $column['Field'] . '` ' . $type . $this->resolveAppends($column, $options);
     }
 
+    private function setEndOfStatement(): string
+    {
+        return $this->assignSemicolon ? ";" : "";
+    }
+
     /**
      * Method to resolve all the possible appends for the column string
      *
@@ -457,7 +479,7 @@ class CloudSpanner implements Processable, Flushable
                 $foreign['CONSTRAINT_NAME'] . '` FOREIGN KEY (`' .
                 $foreign['COLUMN_NAME'] . '`)' . ' REFERENCES `' .
                 $foreign['REFERENCED_TABLE_NAME'] .  '` (`' .
-                $foreign['REFERENCED_COLUMN_NAME'] . '`);';
+                $foreign['REFERENCED_COLUMN_NAME'] . '`)' . $this->setEndOfStatement();
         }
         return $constraints;
     }
@@ -488,7 +510,7 @@ class CloudSpanner implements Processable, Flushable
             $this->assignedUniqueKeys[] = $index['CONSTRAINT_NAME'];
 
             $indexes[] = 'CREATE UNIQUE INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
-                $index['TABLE_NAME'] . '` (`' . $index['COLUMN_NAME'] . '`);';
+                $index['TABLE_NAME'] . '` (`' . $index['COLUMN_NAME'] . '`)' . $this->setEndOfStatement();
         }
         return $indexes;
     }
@@ -499,7 +521,7 @@ class CloudSpanner implements Processable, Flushable
         foreach ($this->secondaryIndexes as $index) {
             $indexName = ucfirst($this->tableName) . 'By' . ucfirst($index);
             $indexes[] = 'CREATE INDEX `' . $indexName . '` ON `' .
-                $this->tableName . '` (`' . $index . '`);';
+                $this->tableName . '` (`' . $index . '`)' . $this->setEndOfStatement();
         }
         return $indexes;
     }
