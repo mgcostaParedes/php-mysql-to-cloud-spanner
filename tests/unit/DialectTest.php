@@ -9,6 +9,7 @@ class DialectTest extends Unit
 {
     private $describer;
     private $table = 'test';
+    private $database = 'test';
 
     protected function setUp(): void
     {
@@ -28,8 +29,9 @@ class DialectTest extends Unit
     {
         $this->assertEquals(
             "SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
-                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $this->table . "'",
-            $this->describer->generateTableKeysDetails($this->table)
+                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '" . $this->table .
+                        "' AND CONSTRAINT_SCHEMA = '" . $this->database . "'",
+            $this->describer->generateTableKeysDetails($this->database, $this->table)
         );
     }
 }

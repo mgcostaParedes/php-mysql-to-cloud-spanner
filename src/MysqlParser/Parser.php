@@ -90,13 +90,13 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
         return $this->defaultID;
     }
 
-    public function setShouldAssignPK(bool $state): Parser
+    public function shouldAssignPrimaryKey(bool $state): Parser
     {
         $this->shouldAssignPK = $state;
         return $this;
     }
 
-    public function shouldAssignPK(): bool
+    public function isPrimaryKeyAssignable(): bool
     {
         return $this->shouldAssignPK;
     }

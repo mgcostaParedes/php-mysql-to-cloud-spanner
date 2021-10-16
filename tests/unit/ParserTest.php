@@ -57,8 +57,8 @@ class ParserTest extends Unit
     }
     public function testShouldGetAssignPKBoolWhenSetShouldAssignPK()
     {
-        $this->parser->setShouldAssignPK(false);
-        $this->assertEquals(false, $this->parser->shouldAssignPK());
+        $this->parser->shouldAssignPrimaryKey(false);
+        $this->assertEquals(false, $this->parser->isPrimaryKeyAssignable());
     }
 
 

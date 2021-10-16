@@ -394,13 +394,20 @@ class CloudSpanner implements Processable, Flushable
 
         // if no primary key founded on table, we should assign a default id column
         if (empty($this->primaryKeys)) {
-            if (!$operator->shouldAssignPK()) {
+            if (!$operator->isPrimaryKeyAssignable()) {
                 throw new PrimaryKeyNotFoundException(PrimaryKeyNotFoundException::MESSAGE);
             }
-            $this->primaryKeys[] = $operator->getDefaultID();
+
+            // verify if it will collide with a schema existing name
+            $columnIndex = array_search($operator->getDefaultID(), array_column($this->columns, 'Field'));
+            if ($columnIndex !== false) {
+                $this->primaryKeys[] = $operator->getDefaultID();
+                return;
+            }
             $column = Dialect::DEFAULT_PRIMARY_KEY_PROPS;
             $column['Field'] = $operator->getDefaultID();
             array_unshift($this->columns, $column);
+            $this->primaryKeys[] = $operator->getDefaultID();
         }
     }
 
@@ -470,7 +477,9 @@ class CloudSpanner implements Processable, Flushable
             if (!empty($multipleColumnKey)) {
                 $columnNames = [];
                 foreach ($multipleColumnKey as $key) {
-                    $columnNames[] = $key['COLUMN_NAME'];
+                    if (!in_array($key['COLUMN_NAME'], $columnNames)) {
+                        $columnNames[] = $key['COLUMN_NAME'];
+                    }
                 }
                 $index['COLUMN_NAME'] = implode('`, `', $columnNames);
             }

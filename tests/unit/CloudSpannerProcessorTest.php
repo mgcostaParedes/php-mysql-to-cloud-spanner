@@ -764,7 +764,40 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
-        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(true)->once();
+        $this->parserBuilder->shouldReceive('isPrimaryKeyAssignable')->andReturn(true)->once();
+        $this->parserBuilder->shouldReceive('getDefaultID')->andReturn('id')->once();
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals([
+            'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+            '`id` INT64 NOT NULL,' . PHP_EOL .
+            '`email` STRING(255) NOT NULL' . PHP_EOL .
+            ') PRIMARY KEY (id);'],
+            $sql['tables']
+        );
+    }
+
+    public function testShouldAssignPrimaryKeyOnExistingColumnWhenSetDefaultIdAsThisColumnName()
+    {
+        $fields = [
+            [
+                'Field' => 'id',
+                'Type' => 'biginteger unsigned',
+                'Null' => 'NO',
+                'Key' => '', // NOT PK
+                'Default' => null,
+                'Extra' => 'auto_increment'
+            ],
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'NO',
+                'Key' => '',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+        $this->setupParserMocksWithoutIndexes($fields, []);
+        $this->parserBuilder->shouldReceive('isPrimaryKeyAssignable')->andReturn(true)->once();
         $this->parserBuilder->shouldReceive('getDefaultID')->andReturn('id')->once();
         $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertEquals([
@@ -789,7 +822,7 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
-        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(true)->once();
+        $this->parserBuilder->shouldReceive('isPrimaryKeyAssignable')->andReturn(true)->once();
         $this->parserBuilder->shouldReceive('getDefaultID')->andReturn('id')->once();
         $firstSql = $this->processor->parseDescribedSchema($this->parserBuilder);
 
@@ -819,7 +852,7 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
         $this->setupParserMocksWithoutIndexes($field, []);
-        $this->parserBuilder->shouldReceive('shouldAssignPK')->andReturn(false)->once();
+        $this->parserBuilder->shouldReceive('isPrimaryKeyAssignable')->andReturn(false)->once();
 
         $this->processor->parseDescribedSchema($this->parserBuilder);
     }
