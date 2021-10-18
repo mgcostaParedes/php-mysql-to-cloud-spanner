@@ -55,12 +55,18 @@ class ParserTest extends Unit
         $this->parser->setDefaultID('test');
         $this->assertEquals('test', $this->parser->getDefaultID());
     }
+
     public function testShouldGetAssignPKBoolWhenSetShouldAssignPK()
     {
         $this->parser->shouldAssignPrimaryKey(false);
         $this->assertEquals(false, $this->parser->isPrimaryKeyAssignable());
     }
 
+    public function testShouldGetAssignSemicolonWhenSetShouldAssignSemicolon()
+    {
+        $this->parser->shouldAssignSemicolon(false);
+        $this->assertEquals(false, $this->parser->isSemicolonAssignable());
+    }
 
     public function testShouldThrowARuntimeExceptionWhenSettingKeysWithInvalidNames()
     {

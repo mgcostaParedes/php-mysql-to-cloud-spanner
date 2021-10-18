@@ -82,14 +82,10 @@ $keys = [
     ]
 ];
 
-// we can pass an argument to define if we want semicolons
-// at the end of each statement, default is true
-$withSemicolons = true;
-
 $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
-                    ->toDDL($withSemicolons);
+                    ->toDDL();
                     
 // it will output an array of DDL statements required to create
 // the necessary elements to compose the table
@@ -116,6 +112,22 @@ to insert on the Google Cloud Spanner engine.
 **Note**: You may want to store the constraint keys to run
 at the end of all tables and indexes to prevent running a
 constraint for a table which is not created.
+
+### Returning DDL statements without semicolons
+
+If for some reason you need each statement without semicolon
+at the end, you can use the method `shouldAssignPrimaryKey`:
+
+```PHP
+
+$schemaParser = (new Parser())->shouldAssignSemicolon(false);
+
+$ddl = $schemaParser->setTableName($tableName)
+                  ->setDescribedTable($table)
+                  ->setKeys($keys)
+                  ->toDDL();
+
+```
 
 ### Dealing with schemas without Primary Keys
 

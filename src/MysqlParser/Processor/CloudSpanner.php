@@ -131,16 +131,6 @@ class CloudSpanner implements Processable, Flushable
     private $assignSemicolon = true;
 
     /**
-     * @param bool $state
-     * @return $this
-     */
-    public function setAssignableSemicolon(bool $state): self
-    {
-        $this->assignSemicolon = $state;
-        return $this;
-    }
-
-    /**
      * Method to parse the describable table from PHP PDO Mysql to raw cloud spanner ddl
      *
      * @param ParserBuildable $builder
@@ -152,6 +142,7 @@ class CloudSpanner implements Processable, Flushable
         $this->tableName = $builder->getTableName();
         $this->columns = $builder->getDescribedTable();
         $this->keys = $builder->getDescribedKeys();
+        $this->assignSemicolon = $builder->isSemicolonAssignable();
         $this->assignKeys($builder);
 
         $tableDDL = 'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL;

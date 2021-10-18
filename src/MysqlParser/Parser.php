@@ -63,9 +63,22 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
      */
     protected $shouldAssignPK = true;
 
+    /**
+     * The bool which will be used to trigger if assign a semicolon at end of each statement
+     *
+     * @var bool
+     */
+    protected $shouldAssignSemicolon = true;
+
     public function __construct(Processable $processor = null)
     {
         $this->processor = $processor ?? new CloudSpanner();
+    }
+
+    public function shouldAssignSemicolon(bool $state): Parser
+    {
+        $this->shouldAssignSemicolon = $state;
+        return $this;
     }
 
     public function setTableName(string $tableName): Parser
@@ -74,20 +87,10 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
         return $this;
     }
 
-    public function getTableName(): string
-    {
-        return $this->tableName;
-    }
-
     public function setDefaultID(string $columnName): Parser
     {
         $this->defaultID = $columnName;
         return $this;
-    }
-
-    public function getDefaultID(): string
-    {
-        return $this->defaultID;
     }
 
     public function shouldAssignPrimaryKey(bool $state): Parser
@@ -96,9 +99,24 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
         return $this;
     }
 
+    public function getTableName(): string
+    {
+        return $this->tableName;
+    }
+
+    public function getDefaultID(): string
+    {
+        return $this->defaultID;
+    }
+
     public function isPrimaryKeyAssignable(): bool
     {
         return $this->shouldAssignPK;
+    }
+
+    public function isSemicolonAssignable(): bool
+    {
+        return $this->shouldAssignSemicolon;
     }
 
     public function setDescribedTable(array $table): Parser
@@ -141,7 +159,7 @@ class Parser implements MysqlParsable, ParserBuildable, PkOperator
     public function toDDL(bool $withSemicolons = true): array
     {
         if (!empty($this->describedTable)) {
-            return $this->processor->setAssignableSemicolon($withSemicolons)->parseDescribedSchema($this);
+            return $this->processor->parseDescribedSchema($this);
         }
 
         throw new ParserException("You must define a described table to parse");
