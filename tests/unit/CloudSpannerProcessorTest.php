@@ -544,9 +544,9 @@ class CloudSpannerProcessorTest extends Unit
             ]
         ];
 
-        $this->setupParserMocksWithoutIndexes($field);
+        $this->setupParserMocksWithoutIndexes($field, [], false);
 
-        $sql = $this->processor->setAssignableSemicolon(false)->parseDescribedSchema($this->parserBuilder);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
         $this->assertDefaultTable('`airline` STRING(255)', $sql, false);
     }
 
@@ -877,12 +877,14 @@ class CloudSpannerProcessorTest extends Unit
         $this->processor->parseDescribedSchema($this->parserBuilder);
     }
 
-    private function setupParserMocksWithoutIndexes(array $table, array $keys = [])
+    private function setupParserMocksWithoutIndexes(array $table, array $keys = [], $semicolon = true)
     {
         $this->parserBuilder->shouldReceive('getTableName')
             ->andReturn($this->tableName)->once();
         $this->parserBuilder->shouldReceive('getDescribedTable')
             ->andReturn($table)->once();
+        $this->parserBuilder->shouldReceive('isSemicolonAssignable')
+            ->andReturn($semicolon)->once();
         $this->parserBuilder->shouldReceive('getDescribedKeys')
             ->andReturn($keys)->once();
     }
