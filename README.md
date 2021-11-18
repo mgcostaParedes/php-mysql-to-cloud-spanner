@@ -1,4 +1,4 @@
-## MySQL Parser to Google Cloud Spanner for PHP
+## MySQL to Google Cloud Spanner Migration Tool for PHP
 
 [![License](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/license)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
 [![Actions Status](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/workflows/CI/badge.svg)](https://github.com/mgcostaParedes/php-mysql-to-cloud-spanner/actions)
@@ -6,7 +6,7 @@
 [![Total Downloads](http://poser.pugx.org/mgcosta/mysql-to-cloud-spanner/downloads)](https://packagist.org/packages/mgcosta/mysql-to-cloud-spanner)
 
 
-The MySQL Parser to Google Cloud Spanner is a library for PHP, providing an easy way to transpile the "create tables" from MySQL to valid schemas for **Google Cloud Spanner** syntax.
+The MySQL Parser to Google Cloud Spanner is a library for PHP, providing an easy way to migrate the data from MySQL to **Google Cloud Spanner**.
 
 ## Install
 
@@ -18,7 +18,7 @@ $ composer require mgcosta/mysql-to-cloud-spanner
 
 ## Usage Instructions
 
-To use the library, you will need an array of the columns from
+To use this toolkit, you will need an array of the columns from
 MySQL and the respective foreign keys / indexes.
 
 The table array you can use the `Describe` from MySQL, the foreign keys you will need to do something like [that](https://dev.mysql.com/doc/refman/8.0/en/information-schema-key-column-usage-table.html).
@@ -224,6 +224,48 @@ $ddl = $schemaParser->setTableName($tableName)
                     ->setDescribedTable($table)
                     ->setKeys($keys)
                     ->toDDL();
+```
+
+### Prepare the data for migration
+
+Sometimes you may have unexpected typed values to insert to Cloud Spanner,
+when you fetch the data from **PHP PDOs** system's, for that you can use the
+available transformer, which will prepare the data mapped with the described table.
+
+For that follow the example below:
+
+```PHP
+use MgCosta\MysqlParser\Transformer\SpannerTransformer;
+
+$table = [
+    [
+        'Field' => 'name',
+        'Type' => 'varchar(255)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ],
+    [
+        'Field' => 'value',
+        'Type' => 'decimal(8,2)',
+        'Null' => 'NO',
+        'Key' => '',
+        'Default' => null,
+        'Extra' => ''
+    ]
+];
+
+$rows = [
+     [
+        'name' => 'product',
+        'value' => '50.20'
+    ]
+];
+
+$transformer = (new SpannerTransformer())->setDescribedTable($table);
+$results = $transformer->setRows($rows)->transform();
+
 ```
 
 
