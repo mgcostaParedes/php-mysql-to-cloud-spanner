@@ -16,6 +16,7 @@ use MgCosta\MysqlParser\Traits\TableColumnTrait;
 class CloudSpanner implements Processable, Flushable
 {
     use TableColumnTrait;
+
     /**
      * The available mysql keys parsed by describe method
      *

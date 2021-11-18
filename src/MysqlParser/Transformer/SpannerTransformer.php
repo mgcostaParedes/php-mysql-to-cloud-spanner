@@ -11,7 +11,9 @@ use MgCosta\MysqlParser\Traits\TableDescriberTrait;
 
 class SpannerTransformer implements TableDescriberOperator, SpannerTransformable
 {
-    use TableDescriberTrait, TableColumnTrait;
+    use TableDescriberTrait;
+    use TableColumnTrait;
+
     /**
      * The described table with columns from MySQL
      *

@@ -17,6 +17,7 @@ use RuntimeException;
 class Parser implements MysqlParsable, TableDescriberOperator, ParserBuildable, PkOperator
 {
     use TableDescriberTrait;
+
     /**
      * The name of the table to parse
      *
