@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MgCosta\MysqlParser;
 
 use MgCosta\MysqlParser\Contracts\PkOperator;
-use MgCosta\MysqlParser\Contracts\TableDescriberOperator;
+use MgCosta\MysqlParser\Contracts\TableDescriber;
 use MgCosta\MysqlParser\Exceptions\ParserException;
 use MgCosta\MysqlParser\Contracts\ParserBuildable;
 use MgCosta\MysqlParser\Contracts\MysqlParsable;
@@ -14,7 +14,7 @@ use MgCosta\MysqlParser\Processor\CloudSpanner;
 use MgCosta\MysqlParser\Traits\TableDescriberTrait;
 use RuntimeException;
 
-class Parser implements MysqlParsable, TableDescriberOperator, ParserBuildable, PkOperator
+class Parser implements MysqlParsable, TableDescriber, ParserBuildable, PkOperator
 {
     use TableDescriberTrait;
 

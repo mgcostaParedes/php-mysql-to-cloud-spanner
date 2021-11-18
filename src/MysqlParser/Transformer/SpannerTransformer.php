@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace MgCosta\MysqlParser\Transformer;
 
 use MgCosta\MysqlParser\Contracts\SpannerTransformable;
-use MgCosta\MysqlParser\Contracts\TableDescriberOperator;
+use MgCosta\MysqlParser\Contracts\TableDescriber;
 use MgCosta\MysqlParser\Traits\TableColumnTrait;
 use MgCosta\MysqlParser\Traits\TableDescriberTrait;
 
-class SpannerTransformer implements TableDescriberOperator, SpannerTransformable
+class SpannerTransformer implements TableDescriber, SpannerTransformable
 {
     use TableDescriberTrait;
     use TableColumnTrait;
