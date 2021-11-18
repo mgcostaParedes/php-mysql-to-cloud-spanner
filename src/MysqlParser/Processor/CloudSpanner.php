@@ -11,10 +11,12 @@ use MgCosta\MysqlParser\Contracts\PkOperator;
 use MgCosta\MysqlParser\Contracts\Processable;
 use MgCosta\MysqlParser\Dialect;
 use MgCosta\MysqlParser\Exceptions\PrimaryKeyNotFoundException;
-use MgCosta\MysqlParser\Parser;
+use MgCosta\MysqlParser\Traits\TableColumnTrait;
 
 class CloudSpanner implements Processable, Flushable
 {
+    use TableColumnTrait;
+
     /**
      * The available mysql keys parsed by describe method
      *
@@ -150,21 +152,19 @@ class CloudSpanner implements Processable, Flushable
         foreach ($this->columns as $index => $column) {
             // find extra details from the column type inside parenthesis
             preg_match('/\\((.*?)\\)/', $column['Type'], $columnTypeDetails);
-            // remove extra details from the type
-            $type = trim(preg_replace('/\s*\([^)]*\)/', '', $column['Type']));
-            // remove white spaces from the type
-            $type = preg_replace('/\s+/', '', $type);
 
-            $method = 'compile' . ucfirst($type);
+            $typeName = $this->cleanTypeName($column['Type']);
+
+            $method = 'compile' . ucfirst($typeName);
             // compile column schema to cloud spanner ddl
             $column['Details'] = $columnTypeDetails;
             $column['isLastOne'] = $index === array_key_last($this->columns);
 
-            if (in_array($type, $this->unavailableDataTypes)) {
+            if (in_array($typeName, $this->unavailableDataTypes)) {
                 $method = 'compileUnavailableTypes';
             }
 
-            if (in_array($type, $this->typesAsInt64)) {
+            if (in_array($typeName, $this->typesAsInt64)) {
                 $method = 'compileInteger';
             }
 
