@@ -5,8 +5,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 COPY --from=mlocati/php-extension-installer:1.1.3 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions xdebug
+RUN install-php-extensions grpc
 
 RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} && \
+    docker-php-ext-enable grpc && \
     ln -sf /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini && \
     echo "display_errors = 0" >> /usr/local/etc/php/php.ini && \
     docker-php-ext-enable xdebug ; \

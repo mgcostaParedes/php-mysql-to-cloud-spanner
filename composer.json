@@ -11,7 +11,9 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-grpc": "*",
+        "google/cloud-spanner": "^1.44.0"
     },
     "require-dev": {
         "ext-xdebug": "*",

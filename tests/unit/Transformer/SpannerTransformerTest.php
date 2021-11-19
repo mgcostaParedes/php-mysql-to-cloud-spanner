@@ -3,6 +3,7 @@
 namespace Tests\unit;
 
 use Codeception\Test\Unit;
+use Google\Cloud\Spanner\Numeric;
 use MgCosta\MysqlParser\Transformer\SpannerTransformer;
 
 class SpannerTransformerTest extends Unit
@@ -61,7 +62,7 @@ class SpannerTransformerTest extends Unit
         $this->transformer->setDescribedTable($this->fields)->setRows($rows);
         $rows = $this->transformer->transform();
 
-        $this->assertIsFloat($rows[0]->value);
+        $this->assertInstanceOf(Numeric::class, $rows[0]->value);
     }
 
     public function testShouldTransformAStringToAFloatFromDecimalTypeSuccessfullyWhenProvidingAMatchedArrayOfArrays()
@@ -76,6 +77,6 @@ class SpannerTransformerTest extends Unit
         $this->transformer->setDescribedTable($this->fields)->setRows($rows);
         $rows = $this->transformer->transform();
 
-        $this->assertIsFloat($rows[0]['value']);
+        $this->assertInstanceOf(Numeric::class, $rows[0]['value']);
     }
 }
