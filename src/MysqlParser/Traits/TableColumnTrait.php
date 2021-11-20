@@ -6,11 +6,26 @@ namespace MgCosta\MysqlParser\Traits;
 
 trait TableColumnTrait
 {
-    public function cleanTypeName(string $name): string
+    /**
+     * The array which will define all the detailed words from MySQL which can be removed
+     *
+     * @var string[]
+     */
+    protected $omitColumnDetailWords = [
+        'unsigned',
+    ];
+
+    public function cleanTypeName(string $name, bool $omitWords = false): string
     {
         // remove extra details from the type
         $name = trim(preg_replace('/\s*\([^)]*\)/', '', $name));
         // remove white spaces from the type
-        return preg_replace('/\s+/', '', $name);
+        $name = preg_replace('/\s+/', '', $name);
+
+        if ($omitWords) {
+            $name = str_replace($this->omitColumnDetailWords, '', $name);
+        }
+
+        return $name;
     }
 }

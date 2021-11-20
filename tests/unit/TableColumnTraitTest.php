@@ -19,4 +19,9 @@ class TableColumnTraitTest extends Unit
     {
         $this->assertEquals('varchar', $this->trait->cleanTypeName('varchar(255)'));
     }
+
+    public function testShouldCleanTypeAndRemoveDetailWords(): void
+    {
+        $this->assertEquals('decimal', $this->trait->cleanTypeName('decimal(4,2) unsigned', true));
+    }
 }
