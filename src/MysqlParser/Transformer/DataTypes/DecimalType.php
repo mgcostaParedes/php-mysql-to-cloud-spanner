@@ -10,10 +10,10 @@ class DecimalType
 {
     /**
      * @param $value
-     * @return Numeric
+     * @return Numeric|null
      */
-    public function __invoke($value): Numeric
+    public function __invoke($value)
     {
-        return new Numeric($value);
+        return !empty($value) ? new Numeric($value) : null;
     }
 }
