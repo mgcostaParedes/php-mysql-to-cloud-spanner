@@ -14,4 +14,11 @@ class DecimalToNumericTest extends Unit
         $numeric = (new DecimalType())($value);
         $this->assertInstanceOf(Numeric::class, $numeric);
     }
+
+    public function testShouldGetNullObjectWhenInvokeObjectWithNullValue(): void
+    {
+        $value = null;
+        $numeric = (new DecimalType())($value);
+        $this->assertNull($numeric);
+    }
 }
