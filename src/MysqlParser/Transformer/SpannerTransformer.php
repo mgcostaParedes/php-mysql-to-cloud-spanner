@@ -80,7 +80,7 @@ class SpannerTransformer implements TableDescriber, SpannerTransformable
             $columnIndex = array_search($key, array_column($this->describedTable, 'Field'));
             if ($columnIndex !== false) {
                 $propertiesToTransform[$key] = new DataTypeFactory(
-                    $this->cleanTypeName($this->describedTable[$columnIndex]['Type'])
+                    $this->cleanTypeName($this->describedTable[$columnIndex]['Type'], true)
                 );
             }
         }
