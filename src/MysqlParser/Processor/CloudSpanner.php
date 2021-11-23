@@ -482,7 +482,7 @@ class CloudSpanner implements Processable, Flushable
             if (in_array($index['CONSTRAINT_NAME'], $this->assignedUniqueKeys)) {
                 continue;
             }
-            $isNullFiltered = $this->IsNullableFiltered($index['COLUMN_NAME']);
+            $isNullFiltered = $this->isNullableFiltered($index['COLUMN_NAME']);
 
             // check multiple column unique indexes
             $multipleColumnKey = array_filter($this->keys, function ($key) use ($index) {
@@ -496,7 +496,7 @@ class CloudSpanner implements Processable, Flushable
                         $columnNames[] = $uniqueKey['COLUMN_NAME'];
                     }
 
-                    $isNullFiltered = $this->IsNullableFiltered($uniqueKey['COLUMN_NAME']);
+                    $isNullFiltered = $this->isNullableFiltered($uniqueKey['COLUMN_NAME']);
                 }
                 $index['COLUMN_NAME'] = implode('`, `', $columnNames);
             }
@@ -522,7 +522,7 @@ class CloudSpanner implements Processable, Flushable
         return $indexes;
     }
 
-    private function IsNullableFiltered(string $columnName): bool
+    private function isNullableFiltered(string $columnName): bool
     {
         $isNullFiltered = true;
 
