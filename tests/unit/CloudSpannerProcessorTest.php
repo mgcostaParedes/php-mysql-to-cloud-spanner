@@ -771,6 +771,49 @@ class CloudSpannerProcessorTest extends Unit
         );
     }
 
+    public function testShouldCompileAnUniqueIndexWithNullFiltered()
+    {
+        $field = [
+            $this->defaultPrimaryKey,
+            [
+                'Field' => 'email',
+                'Type' => 'varchar(255)',
+                'Null' => 'YES',
+                'Key' => 'UNI',
+                'Default' => null,
+                'Extra' => ''
+            ]
+        ];
+
+        $key = [
+            [
+                'TABLE_NAME' => $this->tableName,
+                'COLUMN_NAME' => 'email',
+                'CONSTRAINT_NAME' => $this->tableName . '_email_unique',
+                'REFERENCED_TABLE_NAME' => null,
+                'REFERENCED_COLUMN_NAME' => null
+            ]
+        ];
+
+        $this->setupParserMocksWithoutIndexes($field, $key);
+        $sql = $this->processor->parseDescribedSchema($this->parserBuilder);
+        $this->assertEquals(
+            [
+                'tables' => [
+                    'CREATE TABLE `' . $this->tableName . '` (' . PHP_EOL .
+                    '`id` INT64 NOT NULL,' . PHP_EOL .
+                    '`email` STRING(255)' . PHP_EOL .
+                    ') PRIMARY KEY (id);',
+                ],
+                'indexes' => [
+                    'CREATE UNIQUE NULL_FILTERED INDEX `' . $this->tableName . '_email_unique` ON `' . $this->tableName . '` (`email`);'
+                ],
+                'constraints' => []
+            ],
+            $sql
+        );
+    }
+
     public function testShouldCompileADescribedTableWithoutPKSuccessfullyWithDefaultPrimaryKey()
     {
         $field = [
