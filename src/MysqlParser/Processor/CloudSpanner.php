@@ -482,25 +482,30 @@ class CloudSpanner implements Processable, Flushable
             if (in_array($index['CONSTRAINT_NAME'], $this->assignedUniqueKeys)) {
                 continue;
             }
+            $isNullFiltered = $this->IsNullableFiltered($index['COLUMN_NAME']);
+
             // check multiple column unique indexes
             $multipleColumnKey = array_filter($this->keys, function ($key) use ($index) {
-                return ($key['CONSTRAINT_NAME'] === $index['CONSTRAINT_NAME']);
+                return $key['CONSTRAINT_NAME'] === $index['CONSTRAINT_NAME'];
             });
 
             if (!empty($multipleColumnKey)) {
                 $columnNames = [];
-                foreach ($multipleColumnKey as $key) {
-                    if (!in_array($key['COLUMN_NAME'], $columnNames)) {
-                        $columnNames[] = $key['COLUMN_NAME'];
+                foreach ($multipleColumnKey as $uniqueKey) {
+                    if (!in_array($uniqueKey['COLUMN_NAME'], $columnNames)) {
+                        $columnNames[] = $uniqueKey['COLUMN_NAME'];
                     }
+
+                    $isNullFiltered = $this->IsNullableFiltered($uniqueKey['COLUMN_NAME']);
                 }
                 $index['COLUMN_NAME'] = implode('`, `', $columnNames);
             }
 
             // to prevent duplicated unique keys
             $this->assignedUniqueKeys[] = $index['CONSTRAINT_NAME'];
+            $isNullFilteredSyntax = $isNullFiltered ? ' NULL_FILTERED' : '';
 
-            $indexes[] = 'CREATE UNIQUE INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
+            $indexes[] = 'CREATE UNIQUE' . $isNullFilteredSyntax . ' INDEX `' . $index['CONSTRAINT_NAME'] . '` ON `' .
                 $index['TABLE_NAME'] . '` (`' . $index['COLUMN_NAME'] . '`)' . $this->setEndOfStatement();
         }
         return $indexes;
@@ -515,5 +520,17 @@ class CloudSpanner implements Processable, Flushable
                 $this->tableName . '` (`' . $index . '`)' . $this->setEndOfStatement();
         }
         return $indexes;
+    }
+
+    private function IsNullableFiltered(string $columnName): bool
+    {
+        $isNullFiltered = true;
+
+        $columnIndex = array_search($columnName, array_column($this->columns, 'Field'));
+        if ($columnIndex !== false) {
+            $isNullFiltered = $this->columns[$columnIndex]['Null'] === 'YES';
+        }
+
+        return $isNullFiltered;
     }
 }
